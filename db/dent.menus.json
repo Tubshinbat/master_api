@@ -1,0 +1,103 @@
+[{
+  "_id": {
+    "$oid": "64d7d50ba964e8d8dc8ff4d7"
+  },
+  "status": true,
+  "isDirect": true,
+  "isModel": false,
+  "name": "Нүүр",
+  "direct": "/",
+  "position": 0,
+  "createAt": {
+    "$date": "2023-08-12T18:52:59.044Z"
+  },
+  "updateAt": {
+    "$date": "2023-08-12T18:52:59.044Z"
+  },
+  "slug": "nuur",
+  "__v": 0,
+  "parentId": null
+},
+{
+  "_id": {
+    "$oid": "64d7d682a964e8d8dc8ff4fb"
+  },
+  "status": true,
+  "isDirect": true,
+  "isModel": false,
+  "name": "Эмчилгээ үйлчилгээ",
+  "direct": "/services",
+  "position": 2,
+  "createAt": {
+    "$date": "2023-08-12T18:59:14.295Z"
+  },
+  "updateAt": {
+    "$date": "2023-08-12T18:59:14.295Z"
+  },
+  "slug": "emchilgee-uylchilgee",
+  "__v": 0,
+  "cover": "",
+  "parentId": null
+},
+{
+  "_id": {
+    "$oid": "64d7d6b3a964e8d8dc8ff507"
+  },
+  "status": true,
+  "isDirect": true,
+  "isModel": false,
+  "name": "Бидний тухай",
+  "direct": "/abouts",
+  "position": 1,
+  "createAt": {
+    "$date": "2023-08-12T19:00:03.061Z"
+  },
+  "updateAt": {
+    "$date": "2023-08-12T19:00:03.061Z"
+  },
+  "slug": "bidniy-tuhay",
+  "__v": 0,
+  "parentId": null,
+  "cover": ""
+},
+{
+  "_id": {
+    "$oid": "64d7d89ca964e8d8dc8ff513"
+  },
+  "status": true,
+  "isDirect": true,
+  "isModel": false,
+  "name": "Зөвлөгөө, мэдээлэл",
+  "direct": "/news",
+  "position": 3,
+  "createAt": {
+    "$date": "2023-08-12T19:08:12.225Z"
+  },
+  "updateAt": {
+    "$date": "2023-08-12T19:08:12.225Z"
+  },
+  "slug": "zovlogoo-medeelel",
+  "__v": 0,
+  "cover": "",
+  "parentId": null
+},
+{
+  "_id": {
+    "$oid": "64d7d8a5a964e8d8dc8ff519"
+  },
+  "status": true,
+  "isDirect": true,
+  "isModel": false,
+  "name": "Холбоо барих",
+  "direct": "/contact",
+  "position": 4,
+  "createAt": {
+    "$date": "2023-08-12T19:08:21.510Z"
+  },
+  "updateAt": {
+    "$date": "2023-08-12T19:08:21.510Z"
+  },
+  "slug": "holboo-barih",
+  "__v": 0,
+  "parentId": null
+}]

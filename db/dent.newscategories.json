@@ -1,0 +1,15 @@
+[{
+  "_id": {
+    "$oid": "64db1e5d2119e0ad1fcd38a1"
+  },
+  "status": true,
+  "name": "Зөвлөгөө",
+  "position": 0,
+  "createAt": {
+    "$date": "2023-08-15T06:42:37.940Z"
+  },
+  "updateAt": {
+    "$date": "2023-08-15T06:42:37.940Z"
+  },
+  "__v": 0
+}]

@@ -1,0 +1,20 @@
+[{
+  "_id": {
+    "$oid": "64d914abac7f380a4f1bc239"
+  },
+  "name": "facebook",
+  "link": "https://www.facebook.com/germondental/",
+  "createUser": {
+    "$oid": "64a0fa4330aa6944018c96e1"
+  },
+  "updateUser": {
+    "$oid": "64a0fa4330aa6944018c96e1"
+  },
+  "createAt": {
+    "$date": "2023-08-13T17:36:43.532Z"
+  },
+  "updateAt": {
+    "$date": "2023-08-13T17:36:43.532Z"
+  },
+  "__v": 0
+}]
