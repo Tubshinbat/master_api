@@ -1,0 +1,80 @@
+[{
+  "_id": {
+    "$oid": "64e4e0ed9429cac236effc70"
+  },
+  "status": true,
+  "position": 0,
+  "name": "Үсчин",
+  "createAt": {
+    "$date": "2023-08-22T16:23:09.426Z"
+  },
+  "updateAt": {
+    "$date": "2023-08-22T16:23:09.426Z"
+  },
+  "__v": 0,
+  "parentId": null
+},
+{
+  "_id": {
+    "$oid": "64e4e0f39429cac236effc76"
+  },
+  "status": true,
+  "position": 1,
+  "name": "Гоо сайханч, бусад",
+  "createAt": {
+    "$date": "2023-08-22T16:23:15.742Z"
+  },
+  "updateAt": {
+    "$date": "2023-08-22T16:23:15.742Z"
+  },
+  "__v": 0,
+  "parentId": null
+},
+{
+  "_id": {
+    "$oid": "64e503bf2f7855c2a64a4a3d"
+  },
+  "status": true,
+  "parentId": "64e4e0ed9429cac236effc70",
+  "position": 0,
+  "name": "Эрэгтэй",
+  "createAt": {
+    "$date": "2023-08-22T18:51:43.194Z"
+  },
+  "updateAt": {
+    "$date": "2023-08-22T18:51:43.194Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "64e503c22f7855c2a64a4a43"
+  },
+  "status": true,
+  "parentId": "64e4e0ed9429cac236effc70",
+  "position": 1,
+  "name": "Эмэгтэй",
+  "createAt": {
+    "$date": "2023-08-22T18:51:46.212Z"
+  },
+  "updateAt": {
+    "$date": "2023-08-22T18:51:46.212Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "64e503d32f7855c2a64a4a49"
+  },
+  "status": true,
+  "parentId": "64e4e0ed9429cac236effc70",
+  "position": 2,
+  "name": "Хос үсчин",
+  "createAt": {
+    "$date": "2023-08-22T18:52:03.761Z"
+  },
+  "updateAt": {
+    "$date": "2023-08-22T18:52:03.761Z"
+  },
+  "__v": 0
+}]

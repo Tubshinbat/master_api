@@ -7,10 +7,11 @@ const { imageDelete } = require("../lib/photoUpload");
 const { valueRequired } = require("../lib/check");
 const { userSearch, RegexOptions } = require("../lib/searchOfterModel");
 const MemberCategories = require("../models/MemberCategories");
+const MemberRate = require("../models/MemberRate");
 
 exports.createMember = asyncHandler(async (req, res, next) => {
   req.body.createUser = req.userId;
-
+  if (!valueRequired(req.body.partner)) delete req.body.partner;
   const member = await Members.create(req.body);
   res.status(200).json({
     success: true,
@@ -87,6 +88,11 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
   query.populate("partner");
   query.populate("category");
 
+  query.populate({
+    path: "rating", // Use the path to the virtual property
+    options: { localField: "_id", foreignField: "member" }, // Provide localField and foreignField options
+  });
+
   const qc = query.toConstructor();
   const clonedQuery = new qc();
   const result = await clonedQuery.count();
@@ -95,6 +101,16 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
   query.limit(limit);
   query.skip(pagination.start - 1);
   const members = await query.exec();
+
+  for (const member of members) {
+    const ratings = await MemberRate.find({ member: member._id });
+    if (ratings.length === 0) {
+      member.rating = 0; // Default value if there are no ratings
+    } else {
+      const totalRating = ratings.reduce((sum, rating) => sum + rating.rate, 0);
+      member.rating = totalRating / ratings.length;
+    }
+  }
 
   res.status(200).json({
     success: true,

@@ -44,15 +44,15 @@ var whitelist = [
   "http://localhost:3000",
   "http://localhost:3001",
 
-  "http://germondental.com",
-  "http://www.germondental.com",
-  "http://admin.germondental.com",
-  "http://www.admin.germondental.com",
+  "http://node.mn",
+  "http://www.node.mn",
+  "http://admin.node.mn",
+  "http://www.admin.node.mn",
 
-  "https://germondental.com",
-  "https://www.germondental.com",
-  "https://admin.germondental.com",
-  "https://www.admin.germondental.com",
+  "https://node.mn",
+  "https://www.node.mn",
+  "https://admin.node.mn",
+  "https://www.admin.node.mn",
 ];
 
 // Өөр домэйн дээр байрлах клиент вэб аппуудаас шаардах шаардлагуудыг энд тодорхойлно

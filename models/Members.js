@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const MemberRate = require("./MemberRate");
 const MembersSchema = new mongoose.Schema(
   {
     status: {
@@ -58,6 +58,9 @@ const MembersSchema = new mongoose.Schema(
     updateAt: {
       type: Date,
       default: Date.now,
+    },
+    rating: {
+      type: Number,
     },
 
     createUser: {

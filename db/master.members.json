@@ -1,0 +1,73 @@
+[{
+  "_id": {
+    "$oid": "64e502f32f7855c2a64a49bc"
+  },
+  "status": true,
+  "memberShip": true,
+  "name": "Я. Мөнхгэрэл",
+  "picture": "1692730024434_275152159_1155778955222315_1625074826898494149_n.jpg",
+  "shortAbout": "undefined",
+  "about": "<p>1988-1998 он Улсын тэргүүний Бумцэндийн нэрэмжит 1р 10 жил төгссөн</p>\r\n<p>1999 онд СУИС-н кино драмын ангид элсэн орсон.</p>\r\n<p>1999 онд Цогц тэргүүний сургалт төгссөн</p>",
+  "position": "Үсчин - Мастер",
+  "category": [
+    {
+      "$oid": "64e4e0ed9429cac236effc70"
+    }
+  ],
+  "links": "[{\"name\":\"facebook\",\"link\":\"https://www.facebook.com/buyan.muujig.7\"}]",
+  "experience": "[{\"companyName\":\"Бонус\",\"about\":\" \",\"date\":\"2002 - 2002\",\"position\":\"үсчин\"},{\"companyName\":\"Сувд салон\",\"about\":\"Сувд салон\",\"date\":\"2002 - 2005\",\"position\":\"үсчин\"}]",
+  "createUser": {
+    "$oid": "64a0fa4330aa6944018c96e1"
+  },
+  "createAt": {
+    "$date": "2023-08-22T18:48:19.598Z"
+  },
+  "updateAt": {
+    "$date": "2023-08-22T18:48:19.598Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "64e503562f7855c2a64a4a07"
+  },
+  "status": true,
+  "memberShip": false,
+  "name": "Байгууллагын бүтэц",
+  "picture": "1692734175330_____________________.webp",
+  "shortAbout": "12",
+  "about": "<p>12</p>",
+  "position": "Үсчин - Мастер",
+  "partner": {
+    "$oid": "64e0ff10ad80b83f662c9824"
+  },
+  "category": [
+    {
+      "$oid": "64e503c22f7855c2a64a4a43"
+    },
+    {
+      "$oid": "64e4e0ed9429cac236effc70"
+    },
+    {
+      "$oid": "64e503bf2f7855c2a64a4a3d"
+    },
+    {
+      "$oid": "64e503d32f7855c2a64a4a49"
+    }
+  ],
+  "links": "[{\"name\":\"facebook\",\"link\":\"https://www.facebook.com/buyan.muujig.7\"}]",
+  "experience": "[]",
+  "createUser": {
+    "$oid": "64a0fa4330aa6944018c96e1"
+  },
+  "createAt": {
+    "$date": "2023-08-22T18:49:58.528Z"
+  },
+  "updateAt": {
+    "$date": "2023-08-22T20:09:38.890Z"
+  },
+  "__v": 0,
+  "updateUser": {
+    "$oid": "64a0fa4330aa6944018c96e1"
+  }
+}]
