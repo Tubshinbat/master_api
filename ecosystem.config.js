@@ -5,7 +5,7 @@ module.exports = {
       script: "npm start",
       args: ["--color"],
       env: {
-        PORT: 1001,
+        PORT: 1003,
         NODE_ENV: "prod",
         SERVER_ENV: "prod",
         DEBUG: "server:*",
