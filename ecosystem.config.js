@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "dent-cms-api",
+      name: "master-cms-api",
       script: "npm start",
       args: ["--color"],
       env: {
