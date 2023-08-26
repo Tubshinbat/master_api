@@ -242,13 +242,27 @@ exports.excelData = asyncHandler(async (req, res) => {
 
   // NEWS FIELD
   const userInputs = req.query;
-  const fields = ["status", "star", "name", "type", "categories"];
+  const fields = ["name", "type", "categories"];
   const categories = req.query.categories;
   const createUser = req.query.createUser;
   const updateUser = req.query.updateUser;
   const category = req.query.category;
+  const status = req.query.status;
+  const star = req.query.star;
 
   const query = News.find();
+
+  if (valueRequired(status)) {
+    if (status.split(",").length > 1) {
+      query.where("status").in(status.split(","));
+    } else query.where("status").equals(status);
+  }
+
+  if (valueRequired(star)) {
+    if (star.split(",").length > 1) {
+      query.where("star").in(star.split(","));
+    } else query.where("star").equals(star);
+  }
 
   if (valueRequired(category)) {
     const catIds = await useNewsCategorySearch(category);

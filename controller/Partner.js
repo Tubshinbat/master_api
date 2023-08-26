@@ -4,7 +4,8 @@ const asyncHandler = require("express-async-handler");
 const paginate = require("../utils/paginate");
 const { imageDelete } = require("../lib/photoUpload");
 const { valueRequired } = require("../lib/check");
-const { userSearch } = require("../lib/searchOfterModel");
+const { userSearch, RegexOptions } = require("../lib/searchOfterModel");
+const MemberCategories = require("../models/MemberCategories");
 
 exports.createPartner = asyncHandler(async (req, res, next) => {
   req.body.createUser = req.userId;
@@ -19,7 +20,7 @@ exports.createPartner = asyncHandler(async (req, res, next) => {
 
 exports.getPartners = asyncHandler(async (req, res, next) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 25;
+  const limit = parseInt(req.query.limit) || 40;
   let sort = req.query.sort || { createAt: -1 };
   const select = req.query.select;
 
@@ -29,6 +30,8 @@ exports.getPartners = asyncHandler(async (req, res, next) => {
   const createUser = req.query.createUser;
   const updateUser = req.query.updateUser;
   const status = req.query.status;
+  const categories = req.query.categories;
+  const category = req.query.category;
 
   const query = Partner.find();
 
@@ -46,6 +49,19 @@ exports.getPartners = asyncHandler(async (req, res, next) => {
   if (valueRequired(updateUser)) {
     const userData = await userSearch(updateUser);
     if (userData) query.where("updateUser").in(userData);
+  }
+
+  if (valueRequired(categories)) {
+    const arrayList = categories.split(",");
+
+    query.where("category").in(arrayList);
+  }
+
+  if (valueRequired(category)) {
+    const catagoryData = await MemberCategories.find({
+      name: RegexOptions(category),
+    }).select("_id");
+    if (catagoryData.length > 0) query.where("category").in(catagoryData);
   }
 
   if (valueRequired(sort)) {
@@ -72,6 +88,7 @@ exports.getPartners = asyncHandler(async (req, res, next) => {
   query.select(select);
   query.populate("createUser");
   query.populate("updateUser");
+  query.populate("category");
 
   const qc = query.toConstructor();
   const clonedQuery = new qc();
@@ -174,7 +191,8 @@ exports.multDeletePartner = asyncHandler(async (req, res, next) => {
 exports.getPartner = asyncHandler(async (req, res, next) => {
   const partner = await Partner.findByIdAndUpdate(req.params.id)
     .populate("createUser")
-    .populate("updateUser");
+    .populate("updateUser")
+    .populate("category");
 
   if (!partner) {
     throw new MyError("Тухайн мэдээ олдсонгүй. ", 404);

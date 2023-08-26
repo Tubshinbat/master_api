@@ -8,12 +8,15 @@ const {
   getMembers,
   multDeleteMember,
   getMember,
+  getRateMember,
 } = require("../controller/Members");
 
 router
   .route("/")
   .post(protect, authorize("admin", "operator"), createMember)
   .get(getMembers);
+
+router.route("/rate").get(getRateMember);
 
 router.route("/delete").delete(protect, authorize("admin"), multDeleteMember);
 router

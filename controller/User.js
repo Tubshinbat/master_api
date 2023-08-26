@@ -271,7 +271,7 @@ exports.login = asyncHandler(async (req, res, next) => {
     httpOnly: false,
   };
 
-  res.status(200).cookie("gotiretoken", token, cookieOption).json({
+  res.status(200).cookie("nodetoken", token, cookieOption).json({
     success: true,
     token,
     user,
@@ -315,7 +315,7 @@ exports.loginUser = asyncHandler(async (req, res, next) => {
     httpOnly: false,
   };
 
-  res.status(200).cookie("gotiretoken", token, cookieOption).json({
+  res.status(200).cookie("nodetoken", token, cookieOption).json({
     success: true,
     token,
     user,
@@ -323,7 +323,7 @@ exports.loginUser = asyncHandler(async (req, res, next) => {
 });
 
 exports.getUseInfo = asyncHandler(async (req, res, next) => {
-  const token = req.cookies.gotiretoken;
+  const token = req.cookies.nodetoken;
   const tokenObject = jwt.verify(token, process.env.JWT_SECRET);
 
   if (req.userId !== tokenObject.id) {
@@ -345,7 +345,7 @@ exports.getUseInfo = asyncHandler(async (req, res, next) => {
 });
 
 exports.getUserPasswordChange = asyncHandler(async (req, res, next) => {
-  const token = req.cookies.gotiretoken;
+  const token = req.cookies.nodetoken;
   const tokenObject = jwt.verify(token, process.env.JWT_SECRET);
 
   if (req.userId !== tokenObject.id) {
@@ -379,7 +379,7 @@ exports.getUserPasswordChange = asyncHandler(async (req, res, next) => {
 });
 
 exports.getUseUpdate = asyncHandler(async (req, res, next) => {
-  const token = req.cookies.gotiretoken;
+  const token = req.cookies.nodetoken;
   const tokenObject = jwt.verify(token, process.env.JWT_SECRET);
 
   if (req.userId !== tokenObject.id) {
@@ -411,7 +411,7 @@ exports.getUseUpdate = asyncHandler(async (req, res, next) => {
 });
 
 exports.tokenCheckAlways = asyncHandler(async (req, res, next) => {
-  const token = req.cookies.gotiretoken;
+  const token = req.cookies.nodetoken;
 
   if (!token) {
     throw new MyError("Уучлаарай хандах боломжгүй байна..", 400);
@@ -439,7 +439,7 @@ exports.logout = asyncHandler(async (req, res, next) => {
     expires: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
     httpOnly: false,
   };
-  res.status(200).cookie("gotiretoken", null, cookieOption).json({
+  res.status(200).cookie("nodetoken", null, cookieOption).json({
     success: true,
     data: "logout...",
   });

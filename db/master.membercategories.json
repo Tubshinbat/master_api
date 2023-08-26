@@ -77,4 +77,36 @@
     "$date": "2023-08-22T18:52:03.761Z"
   },
   "__v": 0
+},
+{
+  "_id": {
+    "$oid": "64e6434e0da7b4f31d0d48d5"
+  },
+  "status": true,
+  "parentId": "64e4e0f39429cac236effc76",
+  "position": 0,
+  "name": "Массажист",
+  "createAt": {
+    "$date": "2023-08-23T17:35:10.765Z"
+  },
+  "updateAt": {
+    "$date": "2023-08-23T17:35:10.765Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "64e644490da7b4f31d0d49f7"
+  },
+  "status": true,
+  "parentId": "64e4e0f39429cac236effc76",
+  "position": 1,
+  "name": "Гоо сайханч",
+  "createAt": {
+    "$date": "2023-08-23T17:39:21.012Z"
+  },
+  "updateAt": {
+    "$date": "2023-08-23T17:39:21.012Z"
+  },
+  "__v": 0
 }]

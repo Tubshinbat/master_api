@@ -21,27 +21,51 @@ exports.createMember = asyncHandler(async (req, res, next) => {
 
 exports.getMembers = asyncHandler(async (req, res, next) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 25;
+  const limit = parseInt(req.query.limit) || 24;
   let sort = req.query.sort || { createAt: -1 };
   const select = req.query.select;
 
   //  FIELDS
   const userInputs = req.query;
-  const fields = ["name", "about", "position", "status"];
+  const fields = ["name", "about", "position", "status", "memberShip"];
+  const categories = req.query.categories;
   const category = req.query.category;
   const partner = req.query.partner;
   const createUser = req.query.createUser;
   const updateUser = req.query.updateUser;
+  const status = req.query.status;
+  const memberShip = req.query.memberShip;
+  const name = req.query.name;
 
   const query = Members.find();
+
+  if (valueRequired(status)) {
+    if (status.split(",").length > 1) {
+      query.where("status").in(status.split(","));
+    } else query.where("status").equals(status);
+  }
+
+  if (valueRequired(memberShip)) {
+    if (memberShip.split(",").length > 1) {
+      query.where("memberShip").in(memberShip.split(","));
+    } else query.where("memberShip").equals(memberShip);
+  }
 
   fields.map((field) => {
     if (valueRequired(userInputs[field])) {
       const arrayList = userInputs[field].split(",");
       if (arrayList > 1) query.find({ field: { $in: arrayList } });
-      else query.find({ field: RegexOptions(userInputs[field]) });
+      else {
+        query.find({ field: RegexOptions(userInputs[field]) });
+      }
     }
   });
+
+  if (valueRequired(categories)) {
+    const arrayList = categories.split(",");
+
+    query.where("category").in(arrayList);
+  }
 
   if (valueRequired(createUser)) {
     const userData = await userSearch(createUser);
@@ -60,11 +84,15 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
     if (catagoryData.length > 0) query.where("category").in(catagoryData);
   }
 
+  if (valueRequired(name)) {
+    query.where({ name: RegexOptions(name) });
+  }
+
   if (valueRequired(partner)) {
     const partnerData = await Partner.find({
       name: RegexOptions(partner),
     }).select("_id");
-    if (parentData.length > 0) query.where("partner").in(partnerData);
+    if (partnerData.length > 0) query.where("partner").in(partnerData);
   }
 
   if (valueRequired(sort)) {
@@ -103,12 +131,21 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
   const members = await query.exec();
 
   for (const member of members) {
-    const ratings = await MemberRate.find({ member: member._id });
-    if (ratings.length === 0) {
+    const countRating = await MemberRate.find({ member: member._id }).count();
+    if (countRating === 0) {
       member.rating = 0; // Default value if there are no ratings
     } else {
-      const totalRating = ratings.reduce((sum, rating) => sum + rating.rate, 0);
-      member.rating = totalRating / ratings.length;
+      member.ratingCount = countRating;
+      const r5 = await MemberRate.find({ member: member._id, rate: 5 }).count();
+      const r4 = await MemberRate.find({ member: member._id, rate: 4 }).count();
+      const r3 = await MemberRate.find({ member: member._id, rate: 3 }).count();
+      const r2 = await MemberRate.find({ member: member._id, rate: 2 }).count();
+      const r1 = await MemberRate.find({ member: member._id, rate: 1 }).count();
+
+      const averageRating =
+        (5 * r5 + 4 * r4 + 3 * r3 + 2 * r2 + 1 * r1) / (r1 + r2 + r3 + r4 + r5);
+
+      member.rating = parseInt(averageRating);
     }
   }
 
@@ -117,6 +154,66 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
     count: members.length,
     data: members,
     pagination,
+  });
+});
+
+exports.getRateMember = asyncHandler(async (req, res) => {
+  const userInputs = req.query;
+  const query = {};
+
+  if (valueRequired(userInputs["categories"])) {
+    const array = await MemberCategories.find()
+      .where("_id")
+      .in(userInputs["categories"].split(","))
+      .select("_id");
+    query["category"] = { $in: array.map((el) => el._id) };
+  }
+
+  const members = await Members.aggregate([
+    { $match: query },
+    {
+      $lookup: {
+        from: "memberrates",
+        localField: "_id",
+        foreignField: "member",
+        as: "ratings",
+      },
+    },
+    {
+      $addFields: {
+        rating: {
+          $avg: "$ratings.rate", // Calculate average of 'value' field in ratings array
+        },
+        ratingCount: { $size: "$ratings" }, // Calculate the count of ratings
+      },
+    },
+    {
+      $sort: { ratingCount: -1, rating: -1 }, // Sort by averageRating in descending order
+    },
+    { $limit: 10 },
+  ]);
+
+  for (const member of members) {
+    const countRating = await MemberRate.find({ member: member._id }).count();
+    if (countRating === 0) {
+      member.rating = 0; // Default value if there are no ratings
+    } else {
+      const r5 = await MemberRate.find({ member: member._id, rate: 5 }).count();
+      const r4 = await MemberRate.find({ member: member._id, rate: 4 }).count();
+      const r3 = await MemberRate.find({ member: member._id, rate: 3 }).count();
+      const r2 = await MemberRate.find({ member: member._id, rate: 2 }).count();
+      const r1 = await MemberRate.find({ member: member._id, rate: 1 }).count();
+
+      const averageRating =
+        (5 * r5 + 4 * r4 + 3 * r3 + 2 * r2 + 1 * r1) / (r1 + r2 + r3 + r4 + r5);
+
+      member.rating = parseInt(averageRating);
+    }
+  }
+
+  res.status(200).json({
+    success: true,
+    data: members,
   });
 });
 
@@ -203,14 +300,40 @@ exports.getMember = asyncHandler(async (req, res, next) => {
     .populate("updateUser")
     .populate("partner")
     .populate("category");
-
+  let alternativeMembers = [];
   if (!member) {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
+  }
+  const countRating = await MemberRate.find({ member: member._id }).count();
+  if (countRating === 0) {
+    member.rating = 0; // Default value if there are no ratings
+  } else {
+    const r5 = await MemberRate.find({ member: member._id, rate: 5 }).count();
+    const r4 = await MemberRate.find({ member: member._id, rate: 4 }).count();
+    const r3 = await MemberRate.find({ member: member._id, rate: 3 }).count();
+    const r2 = await MemberRate.find({ member: member._id, rate: 2 }).count();
+    const r1 = await MemberRate.find({ member: member._id, rate: 1 }).count();
+
+    const averageRating =
+      (5 * r5 + 4 * r4 + 3 * r3 + 2 * r2 + 1 * r1) / (r1 + r2 + r3 + r4 + r5);
+
+    member.rating = parseInt(averageRating);
+  }
+
+  const ratingCount = await MemberRate.find({ member: member._id }).count();
+
+  member.ratingCount = ratingCount;
+
+  if (valueRequired(member.partner)) {
+    alternativeMembers = await Members.find({
+      partner: member.partner._id,
+    });
   }
 
   res.status(200).json({
     success: true,
     data: member,
+    alternativeMembers,
   });
 });
 
@@ -223,6 +346,14 @@ exports.updateMember = asyncHandler(async (req, res, next) => {
 
   req.body.updateUser = req.userId;
   req.body.updateAt = Date.now();
+
+  if (valueRequired(req.body.category) === false) {
+    req.body.category = [];
+  }
+
+  if (valueRequired(req.body.partner) === false) {
+    req.body.partner = null;
+  }
 
   member = await Members.findByIdAndUpdate(req.params.id, req.body, {
     new: true,

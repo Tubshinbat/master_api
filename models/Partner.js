@@ -24,6 +24,13 @@ const PartnerSchema = new mongoose.Schema({
 
   links: { type: String },
 
+  category: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "MemberCategories",
+    },
+  ],
+
   logo: {
     type: String,
   },

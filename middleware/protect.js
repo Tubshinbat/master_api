@@ -8,7 +8,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
   if (req.headers.authorization) {
     token = req.header.authorization.split(" ")[1];
   } else if (req.cookies) {
-    token = req.cookies["gotiretoken"];
+    token = req.cookies["nodetoken"];
   }
   if (!token) {
     throw new MyError("Уучлаарай хандах боломжгүй байна..", 400);
@@ -24,7 +24,7 @@ exports.protectUser = asyncHandler(async (req, res, next) => {
   if (req.headers.authorization) {
     token = req.header.authorization.split(" ")[1];
   } else if (req.cookies) {
-    token = req.cookies["gotiretoken"];
+    token = req.cookies["nodetoken"];
   }
   if (!token) {
     throw new MyError("Уучлаарай хандах боломжгүй байна..", 400);

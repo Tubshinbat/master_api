@@ -1,23 +1,28 @@
 [{
   "_id": {
-    "$oid": "64e0ff10ad80b83f662c9824"
+    "$oid": "64e6559e985a3e2ba4ddfaf8"
   },
   "status": true,
-  "name": "asdasd",
-  "about": "<p>asdads</p>",
-  "links": "[{\"name\":\"facebook\",\"link\":\"fa\"},{\"name\":\"twitter\",\"link\":\"twitter\"}]",
-  "logo": "1692466786416_4.-stem-3-.jpg",
+  "name": "wellbee",
+  "about": "<p>Мэргэжлийн үс арчилгааны компани болох Wella professionals нь зах зээлдээ дэлхийд #2, мэргэжлийн үсний будгаар дэлхийд #1, үс шингэрэлтийн эсрэг брэнд Nioxin, үс хэлбэржүүлэх GHD багаж хэрэгсэл үйлдвэрлэлээр зах зээлд #1&ndash;т тус тус үйл ажиллагаагаа явуулж байна. Одоогоор 77+ брэндтэй, 180,000 гаруй харилцагчидтай, 40 гаруй оронд үйл ажиллагаагаа явуулж жил бүр 2.8 тэрбум бүтээгдэхүүн үйлдвэрлэж байна.</p>\r\n<p>Wella компанийн түүхт брэндүүд болох Wella Professional, System Professional, Nioxin, Sebastian, Londa Professional, Sassoon Professional болон GHD нь салон зах зээлийн түүхийг хамт бүтээсэн.</p>\r\n<p>Салоны бизнес болон зах зээлийг эерэгээр хөгжүүлж таныг ч гэсэн энэ хэсгийнхээ нэг байхыг уриалж байна.</p>",
+  "links": "[{\"name\":\"website\",\"link\":\"https://www.wellbee.mn/wella/\"}]",
+  "category": [
+    {
+      "$oid": "64e644490da7b4f31d0d49f7"
+    }
+  ],
+  "logo": "1692816795228_wellbee-logo-web.png",
   "createUser": {
     "$oid": "64a0fa4330aa6944018c96e1"
   },
-  "createAt": {
-    "$date": "2023-08-19T17:42:40.812Z"
-  },
-  "updateAt": {
-    "$date": "2023-08-19T18:25:04.373Z"
-  },
-  "__v": 0,
   "updateUser": {
     "$oid": "64a0fa4330aa6944018c96e1"
-  }
+  },
+  "createAt": {
+    "$date": "2023-08-23T18:53:18.711Z"
+  },
+  "updateAt": {
+    "$date": "2023-08-23T18:53:18.711Z"
+  },
+  "__v": 0
 }]

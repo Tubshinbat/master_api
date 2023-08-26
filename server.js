@@ -41,8 +41,8 @@ connectDB();
 
 // Манай рест апиг дуудах эрхтэй сайтуудын жагсаалт :
 var whitelist = [
-  "http://localhost:3000",
-  "http://localhost:3001",
+  // "http://localhost:3000",
+  // "http://localhost:3001",
 
   "http://node.mn",
   "http://www.node.mn",
