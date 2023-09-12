@@ -11,10 +11,6 @@ exports.createRate = asyncHandler(async (req, res, next) => {
     member: req.body.member,
   });
 
-  if (memberCheck.length > 0) {
-    throw new MyError("Та өмнө үнэлгээ өгсөн байна", "400");
-  }
-
   if (valueRequired(req.body.rate)) {
     const rate = parseInt(req.body.rate);
     if (rate <= 0 && rate > 5) {

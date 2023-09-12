@@ -35,6 +35,16 @@ const PartnerSchema = new mongoose.Schema({
     type: String,
   },
 
+  lat: {
+    type: String,
+    default: "47.91913589111381",
+  },
+
+  long: {
+    type: String,
+    default: "106.91757790656888",
+  },
+
   createAt: {
     type: Date,
     default: Date.now,

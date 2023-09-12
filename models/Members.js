@@ -14,6 +14,16 @@ const MembersSchema = new mongoose.Schema(
       default: false,
     },
 
+    lat: {
+      type: String,
+      default: "47.91913589111381",
+    },
+
+    long: {
+      type: String,
+      default: "106.91757790656888",
+    },
+
     name: {
       type: String,
     },
