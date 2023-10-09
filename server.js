@@ -43,16 +43,21 @@ connectDB();
 var whitelist = [
   "http://localhost:3000",
   "http://localhost:3001",
+  "http://localhost:3002",
 
   "http://node.mn",
   "http://www.node.mn",
   "http://admin.node.mn",
   "http://www.admin.node.mn",
+  "http://master.node.mn",
+  "http://www.master.node.mn",
 
   "https://node.mn",
   "https://www.node.mn",
   "https://admin.node.mn",
   "https://www.admin.node.mn",
+  "https://master.node.mn",
+  "https://www.master.node.mn",
 ];
 
 // Өөр домэйн дээр байрлах клиент вэб аппуудаас шаардах шаардлагуудыг энд тодорхойлно

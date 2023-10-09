@@ -12,6 +12,16 @@ const MemberRate = require("../models/MemberRate");
 exports.createMember = asyncHandler(async (req, res, next) => {
   req.body.createUser = req.userId;
   if (!valueRequired(req.body.partner)) delete req.body.partner;
+
+  if (req.userRole === "partner") {
+    const user = await Members.findById(req.userId);
+    if (user) req.body.partner = user.partner;
+  }
+
+  const uniqueEmail = await Members.find({
+    email: RegexOptions(req.body.email),
+  });
+
   const member = await Members.create(req.body);
   res.status(200).json({
     success: true,
@@ -20,6 +30,22 @@ exports.createMember = asyncHandler(async (req, res, next) => {
 });
 
 exports.getMembers = asyncHandler(async (req, res, next) => {
+  let partnerId = null;
+
+  if (req.memberTokenIs && req.isMember && req.userRole === "user") {
+    throw new MyError("Хандах эрхгүй байна.", 400);
+  }
+  if (req.memberTokenIs && req.isMember && req.userRole === "partner") {
+    const member = await Members.findById(req.userId);
+    if (!member.partner) {
+      throw new MyError("Хандах эрхгүй байна.", 400);
+    }
+    partnerId = member.partner;
+  }
+
+  if (req.memberTokenIs && req.isMember) {
+  }
+
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 24;
   let sort = req.query.sort || { createAt: -1 };
@@ -38,6 +64,10 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
   const name = req.query.name;
 
   const query = Members.find();
+
+  if (valueRequired(partnerId)) {
+    query.where("partner").equals(partnerId);
+  }
 
   if (valueRequired(status)) {
     if (status.split(",").length > 1) {
@@ -295,11 +325,36 @@ exports.multDeleteMember = asyncHandler(async (req, res, next) => {
 });
 
 exports.getMember = asyncHandler(async (req, res, next) => {
-  const member = await Members.findByIdAndUpdate(req.params.id)
+  if (req.memberTokenIs === true && req.isMember === false) {
+    throw new MyError("Хандах эрхгүй байна", 400);
+  }
+
+  const member = await Members.findById(req.params.id)
     .populate("createUser")
     .populate("updateUser")
     .populate("partner")
     .populate("category");
+  console.log(req.userId);
+
+  if (
+    req.userRole !== "partner" &&
+    req.memberTokenIs === true &&
+    req.isMember === true &&
+    req.userId !== req.params.id
+  ) {
+    throw new MyError("Хандах эрхгүй байна", 400);
+  }
+  const user = await Members.findById(req.userId);
+  const memberData = await Members.findById(req.params.id);
+
+  if (
+    req.userRole === "partner" &&
+    !memberData.partner &&
+    user.partner.toString() !== memberData.partner.toString()
+  ) {
+    throw new MyError("Хандах эрхгүй байна", 400);
+  }
+
   let alternativeMembers = [];
   if (!member) {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
@@ -344,15 +399,31 @@ exports.updateMember = asyncHandler(async (req, res, next) => {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
+  if (
+    req.userRole !== "partner" &&
+    req.memberTokenIs === true &&
+    req.isMember === true &&
+    req.userId !== req.params.id
+  ) {
+    throw new MyError("Хандах эрхгүй байна", 400);
+  }
+
+  if (valueRequired(req.body.partner) === false) {
+    req.body.partner = null;
+  }
+
+  if (req.memberTokenIs && req.isMember && req.userRole === "partner") {
+    delete req.body.partner;
+    const user = await Members.findById(req.userId);
+    if (user && member.partner.toString() === user.partner.toString()) {
+    }
+  }
+
   req.body.updateUser = req.userId;
   req.body.updateAt = Date.now();
 
   if (valueRequired(req.body.category) === false) {
     req.body.category = [];
-  }
-
-  if (valueRequired(req.body.partner) === false) {
-    req.body.partner = null;
   }
 
   member = await Members.findByIdAndUpdate(req.params.id, req.body, {
@@ -371,5 +442,95 @@ exports.getCountMember = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     data: member,
+  });
+});
+
+exports.login = asyncHandler(async (req, res, next) => {
+  console.log(req.body);
+  let { email, password, phoneNumber } = req.body;
+  if (valueRequired(email)) email = email.toLowerCase();
+
+  // Оролтыгоо шалгана
+
+  if (!email || !password) {
+    if (!password || !phoneNumber) {
+      throw new MyError(
+        "Имэйл эсвэл утасны дугаар болон нууц үгээ оруулна уу",
+        400
+      );
+    }
+  }
+
+  // Тухайн хэрэглэгчийг хайна
+  let user = await Members.findOne({ email }).select("+password");
+
+  if (!user) {
+    user = await Members.findOne({ phoneNumber }).select("+password");
+    if (!user) {
+      throw new MyError("Имэйл болон нууц үгээ зөв оруулна уу", 401);
+    }
+  }
+
+  const ok = await user.checkPassword(password);
+
+  if (!ok) {
+    throw new MyError(
+      "Имэйл эсвэл утасны дугаар болон нууц үгээ зөв оруулна уу",
+      402
+    );
+  }
+
+  if (user.status === false) {
+    throw new MyError("Уучлаарай таны эрхийг хаасан байна.");
+  }
+
+  const token = user.getJsonWebToken();
+  req.token = token;
+  const cookieOption = {
+    expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+    httpOnly: false,
+  };
+
+  res.status(200).cookie("nodetoken", token, cookieOption).json({
+    success: true,
+    token,
+    user,
+  });
+});
+
+exports.changePassword = asyncHandler(async (req, res) => {
+  const newPassword = req.body.password;
+  const userId = req.body.id;
+
+  if (req.memberTokenIs && req.isMember && req.userRole === "user") {
+    throw new MyError("Хандах эрхгүй байна.", 400);
+  }
+
+  if (req.memberTokenIs && req.isMember && req.userRole === "partner") {
+    const member = await Members.findById(req.userId);
+    if (!member.partner) {
+      throw new MyError("Хандах эрхгүй байна.", 400);
+    }
+  }
+
+  if (!newPassword) {
+    throw new MyError("Нууц үгээ дамжуулна уу.", 400);
+  }
+
+  const user = await Members.findById(userId);
+
+  if (!user) {
+    throw new MyError(req.body.email + "Хандах боломжгүй.", 400);
+  }
+
+  user.password = req.body.password;
+  user.resetPassword = undefined;
+  user.resetPasswordExpire = undefined;
+  user.createAt = Date.now();
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    user,
   });
 });

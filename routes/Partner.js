@@ -10,11 +10,18 @@ const {
   updatePartner,
   getPartner,
 } = require("../controller/Partner");
+const { memberRoles, memberProtect } = require("../middleware/memberRoles");
 
 router
   .route("/")
-  .post(protect, authorize("admin", "operator"), createPartner)
-  .get(getPartners);
+  .post(
+    protect,
+    authorize("admin", "operator", "partner"),
+    memberProtect,
+    memberRoles,
+    createPartner
+  )
+  .get(memberProtect, memberRoles, getPartners);
 
 router
   .route("/count")
@@ -24,7 +31,13 @@ router.route("/delete").delete(protect, authorize("admin"), multDeletePartner);
 
 router
   .route("/:id")
-  .get(getPartner)
-  .put(protect, authorize("admin", "operator"), updatePartner);
+  .get(memberProtect, memberRoles, getPartner)
+  .put(
+    protect,
+    authorize("admin", "operator", "partner"),
+    memberProtect,
+    memberRoles,
+    updatePartner
+  );
 
 module.exports = router;

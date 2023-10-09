@@ -229,7 +229,7 @@ exports.getFullData = asyncHandler(async (req, res) => {
 exports.login = asyncHandler(async (req, res, next) => {
   let { email, password, phoneNumber } = req.body;
   if (valueRequired(email)) email = email.toLowerCase();
-  console.log(req.body);
+
   // Оролтыгоо шалгана
 
   if (!email || !password) {

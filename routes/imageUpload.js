@@ -9,8 +9,20 @@ const {
   allFileUpload,
 } = require("../controller/imageUpload");
 
-router.route("/").post(protect, authorize("admin", "operator"), imageUpload);
-router.route("/").delete(protect, authorize("admin", "operator"), fileRemove);
+router
+  .route("/")
+  .post(
+    protect,
+    authorize("admin", "operator", "partner", "member"),
+    imageUpload
+  );
+router
+  .route("/")
+  .delete(
+    protect,
+    authorize("admin", "operator", "partner", "member"),
+    fileRemove
+  );
 router
   .route("/file")
   .post(protect, authorize("admin", "operator"), allFileUpload);
