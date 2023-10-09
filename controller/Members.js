@@ -329,10 +329,6 @@ exports.multDeleteMember = asyncHandler(async (req, res, next) => {
 });
 
 exports.getMember = asyncHandler(async (req, res, next) => {
-  if (req.memberTokenIs === true && req.isMember === false) {
-    throw new MyError("Хандах эрхгүй байна", 400);
-  }
-
   const member = await Members.findById(req.params.id)
     .populate("createUser")
     .populate("updateUser")
@@ -348,6 +344,7 @@ exports.getMember = asyncHandler(async (req, res, next) => {
   ) {
     throw new MyError("Хандах эрхгүй байна", 400);
   }
+
   const user = await Members.findById(req.userId);
   const memberData = await Members.findById(req.params.id);
 
