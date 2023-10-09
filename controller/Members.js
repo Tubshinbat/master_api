@@ -57,7 +57,15 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
 
   //  FIELDS
   const userInputs = req.query;
-  const fields = ["name", "about", "position", "status", "memberShip"];
+  const fields = [
+    "name",
+    "about",
+    "position",
+    "status",
+    "memberShip",
+    "phoneNumber",
+    "email",
+  ];
   const categories = req.query.categories;
   const category = req.query.category;
   const partner = req.query.partner;
@@ -257,7 +265,14 @@ exports.getFullData = asyncHandler(async (req, res, next) => {
 
   //  FIELDS
   const userInputs = req.query;
-  const fields = ["name", "about", "position", "status"];
+  const fields = [
+    "name",
+    "about",
+    "position",
+    "status",
+    "phoneNumber",
+    "email",
+  ];
   const createUser = req.query.createUser;
   const updateUser = req.query.updateUser;
 
