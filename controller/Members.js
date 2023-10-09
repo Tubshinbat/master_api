@@ -47,9 +47,6 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
     partnerId = member.partner;
   }
 
-  if (req.memberTokenIs && req.isMember) {
-  }
-
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 24;
   let sort = req.query.sort || { createAt: -1 };
@@ -189,6 +186,11 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
 
       member.rating = parseInt(averageRating);
     }
+  }
+
+  if (req.memberTokenIs && req.isMember && req.userRole === "member") {
+    members = await Members.findById(req.userId);
+    members = [members];
   }
 
   res.status(200).json({
