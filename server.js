@@ -58,6 +58,11 @@ var whitelist = [
   "https://www.admin.node.mn",
   "https://master.node.mn",
   "https://www.master.node.mn",
+
+  "http://topmastercenter.com",
+  "http://www.topmastercenter.com",
+  "https://topmastercenter.com",
+  "https://www.topmastercenter.com",
 ];
 
 // Өөр домэйн дээр байрлах клиент вэб аппуудаас шаардах шаардлагуудыг энд тодорхойлно
