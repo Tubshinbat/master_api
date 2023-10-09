@@ -167,7 +167,7 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
   const pagination = await paginate(page, limit, Members, result);
   query.limit(limit);
   query.skip(pagination.start - 1);
-  const members = await query.exec();
+  let members = await query.exec();
 
   for (const member of members) {
     const countRating = await MemberRate.find({ member: member._id }).count();
@@ -189,8 +189,8 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
   }
 
   if (req.memberTokenIs && req.isMember && req.userRole === "member") {
-    members = await Members.findById(req.userId);
-    members = [members];
+    const result = await Members.findById(req.userId);
+    members = [result];
   }
 
   res.status(200).json({
