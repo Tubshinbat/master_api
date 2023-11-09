@@ -8,6 +8,7 @@ const { valueRequired } = require("../lib/check");
 const { userSearch, RegexOptions } = require("../lib/searchOfterModel");
 const MemberCategories = require("../models/MemberCategories");
 const MemberRate = require("../models/MemberRate");
+const jwt = require("jsonwebtoken");
 
 exports.createMember = asyncHandler(async (req, res, next) => {
   req.body.createUser = req.userId;
@@ -29,6 +30,67 @@ exports.createMember = asyncHandler(async (req, res, next) => {
   const member = await Members.create(req.body);
   res.status(200).json({
     success: true,
+    data: member,
+  });
+});
+
+exports.logout = asyncHandler(async (req, res, next) => {
+  const cookieOption = {
+    expires: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    httpOnly: false,
+  };
+  res.status(200).cookie("nodetoken", null, cookieOption).json({
+    success: true,
+    data: "logout...",
+  });
+});
+
+exports.checkToken = asyncHandler(async (req, res) => {
+  const token = req.cookies.nodetoken;
+
+  if (!token) {
+    throw new MyError("Уучлаарай хандах боломжгүй байна..", 400);
+  }
+
+  const tokenObject = jwt.verify(token, process.env.JWT_SECRET);
+
+  req.userId = tokenObject.id;
+  req.userRole = tokenObject.role;
+
+  const user = await Members.findById(tokenObject.id);
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+exports.registerMember = asyncHandler(async (req, res) => {
+  const userInput = req.body;
+  userInput.status = false;
+
+  if (valueRequired(userInput.email)) {
+    const uniqueEmail = await Members.find({
+      email: userInput["email"].toLowerCase(),
+    });
+    if (uniqueEmail && uniqueEmail.length >= 1)
+      throw new MyError("Имэйл хаяг бүртгэлтэй байна.", 400);
+  }
+
+  if (valueRequired(userInput.phoneNumber)) {
+    const uniquePhoneNumber = await Members.find({
+      phoneNumber: userInput["phoneNumber"],
+    });
+    if (uniquePhoneNumber && uniquePhoneNumber >= 1)
+      throw new MyError("Утасны дугаар бүртгэлтэй байна.", 400);
+  }
+
+  const member = await Members.create(userInput);
+  const jwt = member.getJsonWebToken();
+
+  res.status(200).json({
+    success: true,
+    token: jwt,
     data: member,
   });
 });
@@ -351,7 +413,6 @@ exports.getMember = asyncHandler(async (req, res, next) => {
     .populate("updateUser")
     .populate("partner")
     .populate("category");
-  console.log(req.userId);
 
   if (
     req.userRole !== "partner" &&
@@ -464,7 +525,6 @@ exports.getCountMember = asyncHandler(async (req, res, next) => {
 });
 
 exports.login = asyncHandler(async (req, res, next) => {
-  console.log(req.body);
   let { email, password, phoneNumber } = req.body;
   if (valueRequired(email)) email = email.toLowerCase();
 
@@ -498,9 +558,9 @@ exports.login = asyncHandler(async (req, res, next) => {
     );
   }
 
-  if (user.status === false) {
-    throw new MyError("Уучлаарай таны эрхийг хаасан байна.");
-  }
+  // if (user.status === false) {
+  //   throw new MyError("Уучлаарай таны эрхийг хаасан байна.");
+  // }
 
   const token = user.getJsonWebToken();
   req.token = token;

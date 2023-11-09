@@ -11,6 +11,9 @@ const {
   getRateMember,
   login,
   changePassword,
+  registerMember,
+  logout,
+  checkToken,
 } = require("../controller/Members");
 const { memberRoles, memberProtect } = require("../middleware/memberRoles");
 
@@ -24,6 +27,10 @@ router
     createMember
   )
   .get(memberProtect, memberRoles, getMembers);
+
+router.route("/check").post(checkToken);
+router.route("/logout").get(logout);
+router.route("/register").post(registerMember);
 
 router.route("/rate").get(getRateMember);
 router.route("/login").post(login);

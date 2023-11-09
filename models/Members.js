@@ -34,13 +34,20 @@ const MembersSchema = new mongoose.Schema(
       default: "106.91757790656888",
     },
 
+    lastName: {
+      type: String,
+    },
+
     name: {
       type: String,
     },
 
     picture: {
       type: String,
-      required: [true, "Зураг оруулна уу"],
+    },
+
+    cover: {
+      type: String,
     },
 
     shortAbout: {
