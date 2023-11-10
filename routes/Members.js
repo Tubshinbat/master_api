@@ -26,7 +26,7 @@ router
     memberRoles,
     createMember
   )
-  .get(memberProtect, memberRoles, getMembers);
+  .get(getMembers);
 
 router.route("/check").post(checkToken);
 router.route("/logout").get(logout);

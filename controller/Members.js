@@ -96,19 +96,19 @@ exports.registerMember = asyncHandler(async (req, res) => {
 });
 
 exports.getMembers = asyncHandler(async (req, res, next) => {
-  // let partnerId = null;
+  let partnerId = null;
 
-  // if (req.memberTokenIs && req.isMember && req.userRole === "user") {
-  //   throw new MyError("Хандах эрхгүй байна.", 400);
-  // }
+  if (req.memberTokenIs && req.isMember && req.userRole === "user") {
+    throw new MyError("Хандах эрхгүй байна.", 400);
+  }
 
-  // if (req.memberTokenIs && req.isMember && req.userRole === "partner") {
-  //   const member = await Members.findById(req.userId);
-  //   if (!member.partner) {
-  //     throw new MyError("Хандах эрхгүй байна.", 400);
-  //   }
-  //   partnerId = member.partner;
-  // }
+  if (req.memberTokenIs && req.isMember && req.userRole === "partner") {
+    const member = await Members.findById(req.userId);
+    if (!member.partner) {
+      throw new MyError("Хандах эрхгүй байна.", 400);
+    }
+    partnerId = member.partner;
+  }
 
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 24;
@@ -137,9 +137,9 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
 
   const query = Members.find();
 
-  // if (valueRequired(partnerId)) {
-  //   query.where("partner").equals(partnerId);
-  // }
+  if (valueRequired(partnerId)) {
+    query.where("partner").equals(partnerId);
+  }
 
   if (valueRequired(status)) {
     if (status === "true") status = true;
