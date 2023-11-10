@@ -137,9 +137,9 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
 
   const query = Members.find();
 
-  if (valueRequired(partnerId)) {
-    query.where("partner").equals(partnerId);
-  }
+  // if (valueRequired(partnerId)) {
+  //   query.where("partner").equals(partnerId);
+  // }
 
   if (valueRequired(status)) {
     if (status === "true") status = true;
