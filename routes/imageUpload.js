@@ -8,6 +8,7 @@ const {
   fileRemove,
   allFileUpload,
 } = require("../controller/imageUpload");
+const { memberProtect, memberRoles } = require("../middleware/memberRoles");
 
 router
   .route("/")
@@ -16,6 +17,9 @@ router
     authorize("admin", "operator", "partner", "member"),
     imageUpload
   );
+
+router.route("/memberupload").post(memberProtect, memberRoles, imageUpload);
+
 router
   .route("/")
   .delete(

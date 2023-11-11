@@ -121,7 +121,6 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
     "name",
     "about",
     "position",
-    "status",
     "memberShip",
     "phoneNumber",
     "email",
@@ -131,7 +130,7 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
   const partner = req.query.partner;
   const createUser = req.query.createUser;
   const updateUser = req.query.updateUser;
-  let status = req.query.status;
+  let status = req.query.status || null;
   const memberShip = req.query.memberShip;
   const name = req.query.name;
 
@@ -142,10 +141,7 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
   }
 
   if (valueRequired(status)) {
-    if (status === "true") status = true;
-    else if (status === false) status = false;
-
-    if (status.split(",").length > 1) {
+    if (typeof status !== "boolean" && status.split(",").length > 1) {
       query.where("status").in(status.split(","));
     } else query.where("status").equals(status);
   }
@@ -333,14 +329,7 @@ exports.getFullData = asyncHandler(async (req, res, next) => {
 
   //  FIELDS
   const userInputs = req.query;
-  const fields = [
-    "name",
-    "about",
-    "position",
-    "status",
-    "phoneNumber",
-    "email",
-  ];
+  const fields = ["name", "about", "position", "phoneNumber", "email"];
   const createUser = req.query.createUser;
   const updateUser = req.query.updateUser;
 
@@ -349,8 +338,8 @@ exports.getFullData = asyncHandler(async (req, res, next) => {
   fields.map((field) => {
     if (valueRequired(userInputs[field])) {
       const arrayList = userInputs[field].split(",");
-      if (arrayList > 1) query.find({ field: { $in: arrayList } });
-      else query.find({ field: RegexOptions(userInputs[field]) });
+      if (arrayList > 1) query.find({ [field]: { $in: arrayList } });
+      else query.find({ [field]: RegexOptions(userInputs[field]) });
     }
   });
 

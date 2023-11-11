@@ -54,6 +54,8 @@ function createCategories(categories, parentId = null) {
     categoryList.push({
       _id: cate._id,
       name: cate.name,
+      value: cate._id,
+      title: cate.name,
       slug: cate.slug,
       position: cate.position,
       children: createCategories(categories, cate._id),

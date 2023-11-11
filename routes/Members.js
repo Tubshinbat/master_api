@@ -28,6 +28,8 @@ router
   )
   .get(getMembers);
 
+router.route("/getmembers").get(memberProtect, memberRoles, getMembers);
+
 router.route("/check").post(checkToken);
 router.route("/logout").get(logout);
 router.route("/register").post(registerMember);
