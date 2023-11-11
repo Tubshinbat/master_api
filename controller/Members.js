@@ -498,8 +498,6 @@ exports.updateMember = asyncHandler(async (req, res, next) => {
     if (valueRequired(req.body.partner) === false) {
       req.body.partner = null;
     }
-  } else {
-    req.body.status = member.status;
   }
 
   member = await Members.findByIdAndUpdate(req.params.id, req.body, {
