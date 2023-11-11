@@ -480,10 +480,6 @@ exports.updateMember = asyncHandler(async (req, res, next) => {
     throw new MyError("Хандах эрхгүй байна", 400);
   }
 
-  if (valueRequired(req.body.partner) === false) {
-    req.body.partner = null;
-  }
-
   if (req.memberTokenIs && req.isMember && req.userRole === "partner") {
     delete req.body.partner;
     const user = await Members.findById(req.userId);
@@ -494,8 +490,16 @@ exports.updateMember = asyncHandler(async (req, res, next) => {
   req.body.updateUser = req.userId;
   req.body.updateAt = Date.now();
 
-  if (valueRequired(req.body.category) === false) {
-    req.body.category = [];
+  if (req.body.picture && req.body.length > 1) {
+    if (valueRequired(req.body.category) === false) {
+      req.body.category = [];
+    }
+
+    if (valueRequired(req.body.partner) === false) {
+      req.body.partner = null;
+    }
+  } else {
+    req.body.status = member.status;
   }
 
   member = await Members.findByIdAndUpdate(req.params.id, req.body, {
