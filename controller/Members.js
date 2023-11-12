@@ -571,6 +571,39 @@ exports.login = asyncHandler(async (req, res, next) => {
   });
 });
 
+exports.changeMemberPassword = asyncHandler(async (req, res) => {
+  const oldPassword = req.body.oldPassword;
+  const password = req.body.password;
+  const confirm = req.body.confirm;
+
+  let user = await Members.findById(req.userId).select("+password");
+
+  if (!user) {
+    throw new MyError("Хандах эрхгүй байна.", 400);
+  }
+
+  if (password !== confirm) {
+    throw new MyError("Нууц үг тохиорохгүй байна", 400);
+  }
+
+  const ok = await user.checkPassword(oldPassword);
+
+  if (!ok) {
+    throw new MyError("Нууц үг буруу байна", 402);
+  }
+
+  user.password = req.body.password;
+  user.resetPassword = undefined;
+  user.resetPasswordExpire = undefined;
+  user.createAt = Date.now();
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
 exports.changePassword = asyncHandler(async (req, res) => {
   const newPassword = req.body.password;
   const userId = req.body.id;

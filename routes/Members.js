@@ -11,6 +11,7 @@ const {
   getRateMember,
   login,
   changePassword,
+  changeMemberPassword,
   registerMember,
   logout,
   checkToken,
@@ -29,6 +30,9 @@ router
   .get(getMembers);
 
 router.route("/getmembers").get(memberProtect, memberRoles, getMembers);
+router
+  .route("/memberpasswordchange")
+  .put(memberProtect, memberRoles, changeMemberPassword);
 
 router.route("/check").post(checkToken);
 router.route("/logout").get(logout);
@@ -39,13 +43,7 @@ router.route("/login").post(login);
 
 router
   .route("/delete")
-  .delete(
-    protect,
-    authorize("admin", "partner"),
-    memberProtect,
-    memberRoles,
-    multDeleteMember
-  );
+  .delete(protect, authorize("admin", "partner"), multDeleteMember);
 
 router
   .route("/changepassword")
@@ -58,7 +56,7 @@ router
 
 router
   .route("/:id")
-  .get(memberProtect, memberRoles, getMember)
+  .get(getMember)
   .put(
     protect,
     authorize("admin", "operator", "partner", "member"),

@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
+const MyError = require("../utils/myError");
 
 exports.memberRoles = asyncHandler(async (req, res, next) => {
   if (req.userRole === "member" || req.userRole === "partner") {
@@ -21,6 +22,7 @@ exports.memberProtect = asyncHandler(async (req, res, next) => {
 
   if (!token) {
     req.memberTokenIs = false;
+    // throw new MyError("Уучлаарай хандах боломжгүй байна..", 400);
   } else {
     const tokenObject = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = tokenObject.id;

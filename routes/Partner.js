@@ -21,7 +21,7 @@ router
     memberRoles,
     createPartner
   )
-  .get(memberProtect, memberRoles, getPartners);
+  .get(getPartners);
 
 router
   .route("/count")
