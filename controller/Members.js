@@ -117,14 +117,7 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
 
   //  FIELDS
   const userInputs = req.query;
-  const fields = [
-    "name",
-    "about",
-    "position",
-    "memberShip",
-    "phoneNumber",
-    "email",
-  ];
+  const fields = ["name", "about", "position", "phoneNumber", "email"];
   const categories = req.query.categories;
   const category = req.query.category;
   const partner = req.query.partner;
@@ -150,7 +143,7 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
     if (memberShip.split(",").length > 1) {
       query.where("memberShip").in(memberShip.split(","));
     } else {
-      if (typeof memberShip === "string") {
+      if (typeof memberShip == "string") {
         memberShip =
           memberShip === "true" ? true : memberShip === "false" && false;
       }
