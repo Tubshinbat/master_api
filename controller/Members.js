@@ -131,7 +131,7 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
   const createUser = req.query.createUser;
   const updateUser = req.query.updateUser;
   let status = req.query.status || null;
-  const memberShip = req.query.memberShip;
+  let memberShip = req.query.memberShip;
   const name = req.query.name;
 
   const query = Members.find();
@@ -149,7 +149,14 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
   if (valueRequired(memberShip)) {
     if (memberShip.split(",").length > 1) {
       query.where("memberShip").in(memberShip.split(","));
-    } else query.where("memberShip").equals(memberShip);
+    } else {
+      if (typeof memberShip === "string") {
+        memberShip =
+          memberShip === "true" ? true : memberShip === "false" && false;
+      }
+
+      query.where("memberShip").equals(memberShip);
+    }
   }
 
   fields.map((field) => {
