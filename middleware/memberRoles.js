@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
+const { valueRequired } = require("../lib/check");
 const MyError = require("../utils/myError");
 
 exports.memberRoles = asyncHandler(async (req, res, next) => {
@@ -20,14 +21,18 @@ exports.memberProtect = asyncHandler(async (req, res, next) => {
     token = req.cookies["nodetoken"];
   }
 
-  if (!token) {
+  if (!token || !valueRequired(token)) {
     req.memberTokenIs = false;
     // throw new MyError("Уучлаарай хандах боломжгүй байна..", 400);
   } else {
-    const tokenObject = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = tokenObject.id;
-    req.userRole = tokenObject.role;
-    req.memberTokenIs = true;
+    try {
+      const tokenObject = jwt.verify(token, process.env.JWT_SECRET);
+      req.userId = tokenObject.id;
+      req.userRole = tokenObject.role;
+      req.memberTokenIs = true;
+    } catch {
+      next();
+    }
   }
   next();
 });
