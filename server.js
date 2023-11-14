@@ -26,6 +26,10 @@ const partnerRouters = require("./routes/Partner");
 const socialLinkRouters = require("./routes/SocialLink");
 const userRouters = require("./routes/Users");
 const uploadRouters = require("./routes/imageUpload");
+const experienceRouters = require("./routes/Experience");
+const participationRouters = require("./routes/Participation");
+const rewardRouters = require("./routes/Reward");
+const resarchRouters = require("./routes/Research");
 const webInfoRouters = require("./routes/WebInfo");
 const fileRouters = require("./routes/File");
 const rateRouters = require("./routes/MemberRate");
@@ -130,6 +134,10 @@ app.use("/api/v1/webinfo", webInfoRouters);
 app.use("/api/v1/imgupload", uploadRouters);
 app.use("/api/v1/partners", partnerRouters);
 app.use("/api/v1/file", fileRouters);
+app.use("/api/v1/experiences", experienceRouters);
+app.use("/api/v1/participations", participationRouters);
+app.use("/api/v1/rewards", rewardRouters);
+app.use("/api/v1/resarchs", resarchRouters);
 app.use(errorHandler);
 // Алдаа үүсэхэд барьж авч алдааны мэдээллийг клиент тал руу автоматаар мэдээлнэ
 

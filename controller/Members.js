@@ -471,6 +471,10 @@ exports.updateMember = asyncHandler(async (req, res, next) => {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
+  if (!valueRequired(req.body.partner)) {
+    req.body.partner = null;
+  }
+
   if (
     req.userRole !== "partner" &&
     req.memberTokenIs === true &&
@@ -595,7 +599,7 @@ exports.changeMemberPassword = asyncHandler(async (req, res) => {
   user.password = req.body.password;
   user.resetPassword = undefined;
   user.resetPasswordExpire = undefined;
-  user.createAt = Date.now();
+  user.updateAt = Date.now();
   await user.save();
 
   res.status(200).json({
@@ -632,7 +636,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
   user.password = req.body.password;
   user.resetPassword = undefined;
   user.resetPasswordExpire = undefined;
-  user.createAt = Date.now();
+  user.updateAt = Date.now();
   await user.save();
 
   res.status(200).json({
