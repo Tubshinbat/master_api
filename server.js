@@ -33,6 +33,7 @@ const researchRouters = require("./routes/Research");
 const webInfoRouters = require("./routes/WebInfo");
 const fileRouters = require("./routes/File");
 const rateRouters = require("./routes/MemberRate");
+const productRouters = require("./routes/Products");
 const errorHandler = require("./middleware/error");
 const connectDB = require("./config/db");
 
@@ -138,6 +139,7 @@ app.use("/api/v1/experiences", experienceRouters);
 app.use("/api/v1/participations", participationRouters);
 app.use("/api/v1/rewards", rewardRouters);
 app.use("/api/v1/researchs", researchRouters);
+app.use("/api/v1/products", productRouters);
 app.use(errorHandler);
 // Алдаа үүсэхэд барьж авч алдааны мэдээллийг клиент тал руу автоматаар мэдээлнэ
 
