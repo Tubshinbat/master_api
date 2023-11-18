@@ -109,9 +109,12 @@ exports.updateResearch = asyncHandler(async (req, res) => {
   if (!research) {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
+  const ok = await Research.findOne({
+    _id: req.params.id,
+    pkey: req.userId,
+  });
 
-  if (req.userRole === "admin" && req.userRole === "operator") {
-  } else if (req.userRole === "member" && req.userId !== research.pkey) {
+  if (req.userRole === "member" && !valueRequired(ok)) {
     throw new MyError("Хандах эрхгүй байна", 400);
   }
 
@@ -136,10 +139,20 @@ exports.deleteResearch = asyncHandler(async (req, res) => {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
-  if (req.userRole === "admin" && req.userRole === "operator") {
-  } else if (req.userRole === "member" && req.userId !== research.pkey) {
+  const ok = await Research.findOne({
+    _id: req.params.id,
+    pkey: req.userId,
+  });
+
+  if (req.userRole === "member" && !valueRequired(ok)) {
     throw new MyError("Хандах эрхгүй байна", 400);
   }
+
+  research.pictures &&
+    research.pictures.length > 0 &&
+    research.pictures.map(async (el) => {
+      await imageDelete(el);
+    });
 
   research.remove();
 

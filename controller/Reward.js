@@ -77,6 +77,7 @@ exports.getRewards = asyncHandler(async (req, res) => {
         convertSort = { [spliteSort[0]]: -1 };
       }
       if (spliteSort[0] != "undefined") query.sort(convertSort);
+      else if (spliteSort[0] == "undefined") query.sort({ startDate: 1 });
     } else {
       query.sort(sort);
     }
@@ -110,8 +111,12 @@ exports.updateReward = asyncHandler(async (req, res) => {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
-  if (req.userRole === "admin" && req.userRole === "operator") {
-  } else if (req.userRole === "member" && req.userId !== reward.pkey) {
+  const ok = await Reward.findOne({
+    _id: req.params.id,
+    pkey: req.userId,
+  });
+
+  if (req.userRole === "member" && !valueRequired(ok)) {
     throw new MyError("Хандах эрхгүй байна", 400);
   }
 
@@ -136,10 +141,20 @@ exports.deleteReward = asyncHandler(async (req, res) => {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
-  if (req.userRole === "admin" && req.userRole === "operator") {
-  } else if (req.userRole === "member" && req.userId !== reward.pkey) {
+  const ok = await Reward.findOne({
+    _id: req.params.id,
+    pkey: req.userId,
+  });
+
+  if (req.userRole === "member" && !valueRequired(ok)) {
     throw new MyError("Хандах эрхгүй байна", 400);
   }
+
+  reward.pictures &&
+    reward.pictures.length > 0 &&
+    reward.pictures.map(async (el) => {
+      await imageDelete(el);
+    });
 
   reward.remove();
 

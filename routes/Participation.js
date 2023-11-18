@@ -13,13 +13,13 @@ const { memberProtect, memberRoles } = require("../middleware/memberRoles");
 
 router
   .route("/")
-  .post(protect, memberProtect, memberRoles, createParticipation)
+  .post(memberProtect, memberRoles, createParticipation)
   .get(getParticipations);
 
 router
   .route("/:id")
-  .get(protect, memberProtect, memberRoles, getParticipation)
-  .put(protect, memberProtect, memberRoles, updateParticipation)
-  .delete(protect, memberProtect, memberRoles, deleteParticipation);
+  .get(memberProtect, memberRoles, getParticipation)
+  .put(memberProtect, memberRoles, updateParticipation)
+  .delete(memberProtect, memberRoles, deleteParticipation);
 
 module.exports = router;

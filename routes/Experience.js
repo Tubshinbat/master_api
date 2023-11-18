@@ -18,8 +18,8 @@ router
 
 router
   .route("/:id")
-  .get(protect, memberProtect, memberRoles, getExperience)
-  .put(protect, memberProtect, memberRoles, updateExperience)
-  .delete(protect, memberProtect, memberRoles, deleteExperience);
+  .get(memberProtect, memberRoles, getExperience)
+  .put(memberProtect, memberRoles, updateExperience)
+  .delete(memberProtect, memberRoles, deleteExperience);
 
 module.exports = router;

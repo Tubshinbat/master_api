@@ -31,8 +31,8 @@ exports.getParticipation = asyncHandler(async (req, res) => {
 
 exports.getParticipations = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 24;
-  let sort = req.query.sort || { createAt: -1 };
+  const limit = parseInt(req.query.limit) || 10;
+  let sort = req.query.sort || { date: 1 };
   const select = req.query.select;
 
   const userInputs = req.query;
@@ -78,6 +78,7 @@ exports.getParticipations = asyncHandler(async (req, res) => {
         convertSort = { [spliteSort[0]]: -1 };
       }
       if (spliteSort[0] != "undefined") query.sort(convertSort);
+      else if (spliteSort[0] == "undefined") query.sort({ date: 1 });
     } else {
       query.sort(sort);
     }
@@ -111,11 +112,14 @@ exports.updateParticipation = asyncHandler(async (req, res) => {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
-  if (req.userRole === "admin" && req.userRole === "operator") {
-  } else if (req.userRole === "member" && req.userId !== participation.pkey) {
+  const ok = await Participation.findOne({
+    _id: req.params.id,
+    pkey: req.userId,
+  });
+
+  if (req.userRole === "member" && !valueRequired(ok)) {
     throw new MyError("Хандах эрхгүй байна", 400);
   }
-
   req.body.updateUser = req.userId;
   req.body.updateAt = Date.now();
 
@@ -130,21 +134,31 @@ exports.updateParticipation = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    data: member,
+    data: participation,
   });
 });
 
 exports.deleteParticipation = asyncHandler(async (req, res) => {
+  const ok = await Participation.findOne({
+    _id: req.params.id,
+    pkey: req.userId,
+  });
+
+  if (req.userRole === "member" && !valueRequired(ok)) {
+    throw new MyError("Хандах эрхгүй байна", 400);
+  }
+
   let participation = await Participation.findById(req.params.id);
 
   if (!participation) {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
-  if (req.userRole === "admin" && req.userRole === "operator") {
-  } else if (req.userRole === "member" && req.userId !== participation.pkey) {
-    throw new MyError("Хандах эрхгүй байна", 400);
-  }
+  participation.pictures &&
+    participation.pictures.length > 0 &&
+    participation.pictures.map(async (el) => {
+      await imageDelete(el);
+    });
 
   participation.remove();
 

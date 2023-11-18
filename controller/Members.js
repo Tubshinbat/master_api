@@ -46,16 +46,21 @@ exports.logout = asyncHandler(async (req, res, next) => {
 });
 
 exports.checkToken = asyncHandler(async (req, res) => {
-  const token = req.cookies.nodetoken;
+  const token = req.cookies;
 
-  if (!token) {
-    throw new MyError("Уучлаарай хандах боломжгүй байна..", 400);
+  if (!token || (token && !token.nodetoken)) {
+    const cookieOption = {
+      expires: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      httpOnly: false,
+    };
+    res.status(400).cookie("nodetoken", null, cookieOption).json({
+      success: false,
+      data: "logout...",
+    });
+    // throw new MyError("Уучлаарай хандах боломжгүй байна..", 400);
   }
 
-  const tokenObject = jwt.verify(token, process.env.JWT_SECRET);
-
-  req.userId = tokenObject.id;
-  req.userRole = tokenObject.role;
+  const tokenObject = jwt.verify(token.nodetoken, process.env.JWT_SECRET);
 
   const user = await Members.findById(tokenObject.id);
 

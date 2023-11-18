@@ -50,17 +50,17 @@ const ExperienceSchema = new mongoose.Schema({
 
   pkey: {
     type: mongoose.Schema.ObjectId,
-    ref: "User",
+    ref: "Members",
   },
 
   createUser: {
     type: mongoose.Schema.ObjectId,
-    ref: "User",
+    ref: "Members",
   },
 
   updateUser: {
     type: mongoose.Schema.ObjectId,
-    ref: "User",
+    ref: "Members",
   },
 });
 
