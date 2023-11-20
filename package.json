@@ -39,7 +39,7 @@
     "morgan": "^1.10.0",
     "mysql": "^2.18.1",
     "node-imager": "^0.1.5",
-    "nodemailer": "^6.7.5",
+    "nodemailer": "^6.9.7",
     "nodemon": "^2.0.7",
     "path": "^0.12.7",
     "rotating-file-stream": "^2.1.5",

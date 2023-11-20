@@ -9,6 +9,10 @@ const { userSearch, RegexOptions } = require("../lib/searchOfterModel");
 const MemberCategories = require("../models/MemberCategories");
 const MemberRate = require("../models/MemberRate");
 const jwt = require("jsonwebtoken");
+const sendEmail = require("../utils/email");
+const { find, findByIdAndUpdate } = require("../models/User");
+const bcrypt = require("bcrypt");
+const moment = require("moment");
 
 exports.createMember = asyncHandler(async (req, res, next) => {
   req.body.createUser = req.userId;
@@ -577,6 +581,133 @@ exports.login = asyncHandler(async (req, res, next) => {
     success: true,
     token,
     user,
+  });
+});
+
+exports.forgetPasswordChange = asyncHandler(async (req, res) => {
+  const resetToken = req.body.resetToken;
+  const password = req.body.password;
+  const confirm = req.body.confirm;
+
+  if (!valueRequired(resetToken)) {
+    throw new MyError("Хандах эрхгүй байна.", 400);
+  }
+
+  const member = await Members.findOne({ resetPasswordToken: resetToken });
+
+  if (!member) {
+    throw new MyError("Хандах эрхгүй байна.", 400);
+  }
+
+  let user = await Members.findById(member._id);
+
+  console.log(user);
+
+  if (password !== confirm) {
+    throw new MyError("Нууц үг тохиорохгүй байна", 400);
+  }
+
+  user.password = req.body.password;
+  user.resetPassword = undefined;
+  user.resetPasswordExpire = undefined;
+  user.updateAt = Date.now();
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+exports.resetTokenCheck = asyncHandler(async (req, res) => {
+  const { resetToken } = req.body;
+  if (!valueRequired(resetToken)) {
+    throw new MyError("Хандах эрхгүй байна.", 400);
+  }
+
+  const member = await Members.findOne({
+    resetPasswordToken: resetToken,
+  });
+
+  if (
+    !valueRequired(member) ||
+    new Date(Date.now()) >= member.resetPasswordExpire
+  ) {
+    const resetPasswordToken = undefined;
+    const resetPasswordExpire = undefined;
+    await Members.findByIdAndUpdate(member._id, {
+      resetPasswordToken,
+      resetPasswordExpire,
+    });
+    throw new MyError(
+      "Нууц үг сэргээх хугацаа дууссан байна дахин имэйлээр авна уу.",
+      400
+    );
+  }
+
+  res.status(200).json({
+    success: true,
+  });
+});
+
+exports.sendPassword = asyncHandler(async (req, res) => {
+  const userInputs = req.body;
+
+  if (valueRequired(userInputs.email)) {
+    const email = userInputs.email.toLowerCase();
+    const memberCheck = await Members.find({ email: email });
+    if (!memberCheck || memberCheck.length <= 0) {
+      throw new MyError("Та бүртгэлгүй байна.", 404);
+    }
+  } else {
+    throw new MyError("Имэйл хаягаа оруулна уу", 400);
+  }
+
+  const member = await Members.findOne({
+    email: userInputs.email.toLowerCase(),
+  });
+
+  if (new Date(Date.now()) < member.resetPasswordExpire) {
+    const resetPasswordToken = undefined;
+    const resetPasswordExpire = undefined;
+    await Members.findByIdAndUpdate(member._id, {
+      resetPasswordToken,
+      resetPasswordExpire,
+    });
+    throw new MyError("Имэйл хаягт илгээсэн байна", 400);
+  }
+
+  const rndNumber = 100000 + Math.floor(Math.random() * 900000);
+  const salt = await bcrypt.genSalt(10);
+  const a = await bcrypt.hash(rndNumber + "", salt);
+
+  const resetPasswordToken = a
+    .replaceAll(/^\s+|\s+$|\n|\t|,/gm, "")
+    .replaceAll("/", "")
+    .replaceAll(".", "")
+    .replaceAll("&", "")
+    .replaceAll("$", "")
+    .replaceAll("?", "");
+
+  const resetPasswordExpire = new Date(Date.now() + 1000 * 60);
+
+  const data = {
+    email: userInputs.email.toLowerCase(),
+    subject: "Нууц үг сэргээх (node.mn)",
+    text: "Нууц үг сэргээх",
+    html: `Нууц үг сэргээх линк: <a href="${process.env.SITE}forget/${resetPasswordToken}"> ${process.env.SITE}forget/${resetPasswordToken} </a>`,
+  };
+
+  const result = await sendEmail({ ...data });
+
+  const memberResult = await Members.findByIdAndUpdate(member._id, {
+    resetPasswordToken,
+    resetPasswordExpire,
+  });
+
+  res.status(200).json({
+    success: true,
+    result,
   });
 });
 

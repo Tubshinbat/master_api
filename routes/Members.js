@@ -15,6 +15,9 @@ const {
   registerMember,
   logout,
   checkToken,
+  sendPassword,
+  resetTokenCheck,
+  forgetPasswordChange,
 } = require("../controller/Members");
 const { memberRoles, memberProtect } = require("../middleware/memberRoles");
 
@@ -53,6 +56,10 @@ router
     memberRoles,
     changePassword
   );
+
+router.route("/forget").post(sendPassword);
+router.route("/forgetpasswordchange").post(forgetPasswordChange);
+router.route("/resetToken").post(resetTokenCheck);
 
 router
   .route("/:id")
