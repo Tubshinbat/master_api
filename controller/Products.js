@@ -2,6 +2,7 @@ const Product = require("../models/Products");
 const MyError = require("../utils/myError");
 const asyncHandler = require("express-async-handler");
 // const fs = require("fs");
+const ProductRate = require("../models/ProductRate");
 const MemberCategories = require("../models/MemberCategories");
 const paginate = require("../utils/paginate");
 const { imageDelete } = require("../lib/photoUpload");
@@ -136,6 +137,7 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
   const status = req.query.status;
   const name = req.query.name;
   const productCategories = req.query.categoryname;
+  const categories = req.query.categories;
   const price = req.query.price;
   const discount = req.query.discount;
   const minPrice = req.query.minprice;
@@ -169,6 +171,11 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
 
     const array = await MemberCategories.find({ $or: match }).select("_id");
     query.where("productCategories").in(array.map((el) => el._id));
+  }
+
+  if (valueRequired(categories)) {
+    const arrayList = categories.split(",");
+    query.where("productCategories").in(arrayList);
   }
 
   if (valueRequired(name)) query.find({ name: RegexOptions(name) });
@@ -250,12 +257,48 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
   const pagination = await paginate(page, limit, Product, result);
   query.limit(limit);
   query.skip(pagination.start - 1);
-  const product = await query.exec();
+  const products = await query.exec();
+
+  for (const product of products) {
+    const countRating = await ProductRate.find({
+      product: product._id,
+    }).count();
+    if (countRating === 0) {
+      product.rating = 0; // Default value if there are no ratings
+    } else {
+      product.ratingCount = countRating;
+      const r5 = await ProductRate.find({
+        product: product._id,
+        rate: 5,
+      }).count();
+      const r4 = await ProductRate.find({
+        product: product._id,
+        rate: 4,
+      }).count();
+      const r3 = await ProductRate.find({
+        product: product._id,
+        rate: 3,
+      }).count();
+      const r2 = await ProductRate.find({
+        product: product._id,
+        rate: 2,
+      }).count();
+      const r1 = await ProductRate.find({
+        product: product._id,
+        rate: 1,
+      }).count();
+
+      const averageRating =
+        (5 * r5 + 4 * r4 + 3 * r3 + 2 * r2 + 1 * r1) / (r1 + r2 + r3 + r4 + r5);
+
+      product.rating = parseInt(averageRating);
+    }
+  }
 
   res.status(200).json({
     success: true,
-    count: product.length,
-    data: product,
+    count: products.length,
+    data: products,
     pagination,
   });
 });
@@ -398,6 +441,7 @@ exports.excelData = asyncHandler(async (req, res) => {
   const status = req.query.status;
   const name = req.query.name;
   const productCategories = req.query.categoryname;
+  const categories = req.query.categories;
   const price = req.query.price;
   const discount = req.query.discount;
   const minPrice = req.query.minprice;
@@ -409,6 +453,11 @@ exports.excelData = asyncHandler(async (req, res) => {
   const arrayBooleanFields = ["star", "isDiscount", "status"];
 
   const query = Product.find();
+
+  if (valueRequired(categories)) {
+    const arrayList = categories.split(",");
+    query.where("productCategories").in(arrayList);
+  }
 
   arrayBooleanFields.map((el) => {
     if (valueRequired(req.query[el])) {
@@ -610,14 +659,128 @@ exports.multDeleteProduct = asyncHandler(async (req, res, next) => {
   });
 });
 
+exports.getRateProduct = asyncHandler(async (req, res) => {
+  const userInputs = req.query;
+  const query = {};
+
+  if (valueRequired(userInputs["categories"])) {
+    const array = await MemberCategories.find()
+      .where("_id")
+      .in(userInputs["categories"].split(","))
+      .select("_id");
+    query["productCategories"] = { $in: array.map((el) => el._id) };
+  }
+
+  const products = await Product.aggregate([
+    { $match: query },
+    {
+      $lookup: {
+        from: "productrates",
+        localField: "_id",
+        foreignField: "product",
+        as: "ratings",
+      },
+    },
+    {
+      $addFields: {
+        rating: {
+          $avg: "$ratings.rate", // Calculate average of 'value' field in ratings array
+        },
+        ratingCount: { $size: "$ratings" }, // Calculate the count of ratings
+      },
+    },
+    {
+      $sort: { ratingCount: -1, rating: -1 }, // Sort by averageRating in descending order
+    },
+    { $limit: 10 },
+  ]);
+
+  for (const product of products) {
+    const countRating = await ProductRate.find({
+      product: product._id,
+    }).count();
+    if (countRating === 0) {
+      product.rating = 0; // Default value if there are no ratings
+    } else {
+      const r5 = await ProductRate.find({
+        product: product._id,
+        rate: 5,
+      }).count();
+      const r4 = await ProductRate.find({
+        product: product._id,
+        rate: 4,
+      }).count();
+      const r3 = await ProductRate.find({
+        product: product._id,
+        rate: 3,
+      }).count();
+      const r2 = await ProductRate.find({
+        product: product._id,
+        rate: 2,
+      }).count();
+      const r1 = await ProductRate.find({
+        product: product._id,
+        rate: 1,
+      }).count();
+
+      const averageRating =
+        (5 * r5 + 4 * r4 + 3 * r3 + 2 * r2 + 1 * r1) / (r1 + r2 + r3 + r4 + r5);
+
+      product.rating = parseInt(averageRating);
+    }
+  }
+  res.status(200).json({
+    success: true,
+    data: products,
+  });
+});
+
 exports.getProduct = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.id).populate(
-    "productCategories"
-  );
+  const product = await Product.findById(req.params.id)
+    .populate("productCategories")
+    .populate("createUser")
+    .populate("updateUser");
 
   if (!product) {
     throw new MyError("Тухайн мэдээ олдсонгүй. ", 404);
   }
+  const countRating = await ProductRate.find({ product: product._id }).count();
+
+  if (countRating === 0) {
+    product.rating = 0; // Default value if there are no ratings
+  } else {
+    const r5 = await ProductRate.find({
+      product: product._id,
+      rate: 5,
+    }).count();
+    const r4 = await ProductRate.find({
+      product: product._id,
+      rate: 4,
+    }).count();
+    const r3 = await ProductRate.find({
+      product: product._id,
+      rate: 3,
+    }).count();
+    const r2 = await ProductRate.find({
+      product: product._id,
+      rate: 2,
+    }).count();
+    const r1 = await ProductRate.find({
+      product: product._id,
+      rate: 1,
+    }).count();
+
+    const averageRating =
+      (5 * r5 + 4 * r4 + 3 * r3 + 2 * r2 + 1 * r1) / (r1 + r2 + r3 + r4 + r5);
+
+    product.rating = parseInt(averageRating);
+  }
+
+  const ratingCount = await ProductRate.find({
+    product: product._id,
+  }).count();
+
+  product.ratingCount = ratingCount;
 
   res.status(200).json({
     success: true,

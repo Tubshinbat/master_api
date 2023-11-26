@@ -84,6 +84,16 @@ const ProductsSchema = new mongoose.Schema(
       },
     ],
 
+    rating: {
+      type: Number,
+      default: 0,
+    },
+
+    ratingCount: {
+      type: Number,
+      default: 0,
+    },
+
     createUser: {
       type: mongoose.Schema.ObjectId,
       ref: "User",

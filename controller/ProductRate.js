@@ -1,14 +1,14 @@
-const MemberRate = require("../models/MemberRate");
+const ProductRate = require("../models/ProductRate");
 const MyError = require("../utils/myError");
 const asyncHandler = require("express-async-handler");
 const paginate = require("../utils/paginate");
 const { valueRequired } = require("../lib/check");
-const { memberSearch } = require("../lib/searchOfterModel");
+const { productSearch } = require("../lib/searchOfterModel");
 
 exports.createRate = asyncHandler(async (req, res, next) => {
-  const memberCheck = await MemberRate.find({
+  const productCheck = await ProductRate.find({
     phoneNumber: req.body.phoneNumber,
-    member: req.body.member,
+    product: req.body.product,
   });
 
   if (valueRequired(req.body.rate)) {
@@ -18,10 +18,10 @@ exports.createRate = asyncHandler(async (req, res, next) => {
     }
   }
 
-  const memberRate = await MemberRate.create(req.body);
+  const productRate = await ProductRate.create(req.body);
   res.status(200).json({
     success: true,
-    data: memberRate,
+    data: productRate,
   });
 });
 
@@ -34,9 +34,9 @@ exports.getRates = asyncHandler(async (req, res, next) => {
   // PARTNER FIELDS
   const phoneNumber = req.query.phoneNumber;
   const rate = req.query.rate;
-  const member = req.query.member;
+  const product = req.query.product;
 
-  const query = MemberRate.find();
+  const query = ProductRate.find();
 
   if (valueRequired(phoneNumber)) {
     query.find({ phoneNumber: phoneNumber });
@@ -46,9 +46,9 @@ exports.getRates = asyncHandler(async (req, res, next) => {
     query.find({ rate: rate });
   }
 
-  if (valueRequired(member)) {
-    const userData = await memberSearch(member);
-    if (userData) query.where("member").in(userData);
+  if (valueRequired(product)) {
+    const data = await productSearch(product);
+    if (data) query.where("product").in(data);
   }
 
   if (valueRequired(sort)) {
@@ -67,34 +67,34 @@ exports.getRates = asyncHandler(async (req, res, next) => {
   }
 
   query.select(select);
-  query.populate("member");
+  query.populate("product");
 
   const qc = query.toConstructor();
   const clonedQuery = new qc();
   const result = await clonedQuery.count();
 
-  const pagination = await paginate(page, limit, MemberRate, result);
+  const pagination = await paginate(page, limit, ProductRate, result);
   query.limit(limit);
   query.skip(pagination.start - 1);
-  const memberRate = await query.exec();
+  const productRate = await query.exec();
 
   res.status(200).json({
     success: true,
-    count: memberRate.length,
-    data: memberRate,
+    count: productRate.length,
+    data: productRate,
     pagination,
   });
 });
 
 exports.multDeleteRate = asyncHandler(async (req, res, next) => {
   const ids = req.queryPolluted.id;
-  const findRates = await MemberRate.find({ _id: { $in: ids } });
+  const findRates = await ProductRate.find({ _id: { $in: ids } });
 
   if (findRates.length <= 0) {
     throw new MyError("Таны сонгосон өгөгдөл олдсонгүй", 400);
   }
 
-  await MemberRate.deleteMany({ _id: { $in: ids } });
+  await ProductRate.deleteMany({ _id: { $in: ids } });
 
   res.status(200).json({
     success: true,
@@ -102,8 +102,8 @@ exports.multDeleteRate = asyncHandler(async (req, res, next) => {
 });
 
 exports.getRate = asyncHandler(async (req, res, next) => {
-  const rate = await MemberRate.findByIdAndUpdate(req.params.id).populate(
-    "member"
+  const rate = await ProductRate.findByIdAndUpdate(req.params.id).populate(
+    "product"
   );
 
   if (!rate) {
