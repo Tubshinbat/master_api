@@ -14,7 +14,7 @@ const { memberProtect, memberRoles } = require("../middleware/memberRoles");
 router
   .route("/")
   .post(protect, memberProtect, memberRoles, createExperience)
-  .get(getExperiences);
+  .get(memberProtect, getExperiences);
 
 router
   .route("/:id")

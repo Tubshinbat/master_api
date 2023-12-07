@@ -799,8 +799,8 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
   const nameUnique = await Product.find({}).where("name").equals(name);
 
   if (!req.body.slug) {
-    if (uniqueName.length > 0) {
-      req.body.slug = slugify(req.body.name + "_" + uniqueName.length);
+    if (nameUnique.length > 0) {
+      req.body.slug = slugify(req.body.name + "_" + nameUnique.length);
     } else {
       req.body.slug = slugify(req.body.name);
     }

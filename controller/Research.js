@@ -34,6 +34,7 @@ exports.getResearchs = asyncHandler(async (req, res) => {
   const limit = parseInt(req.query.limit) || 24;
   let sort = req.query.sort || { createAt: -1 };
   const select = req.query.select;
+  const isUser = req.query.usersearch || null;
 
   const userInputs = req.query;
   const fields = ["name", "date"];
@@ -41,6 +42,12 @@ exports.getResearchs = asyncHandler(async (req, res) => {
   const updateUser = req.query.updateUser;
   const pkey = req.query.pkey;
   const query = Research.find();
+
+  if (valueRequired(isUser)) {
+    if (isUser === true || isUser == "true") {
+      query.find({ pkey: req.userId });
+    }
+  }
 
   fields.map((field) => {
     if (valueRequired(userInputs[field])) {

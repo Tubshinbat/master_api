@@ -33,6 +33,7 @@ exports.getExperiences = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   let sort = req.query.sort || { startDate: 1 };
+  const isUser = req.query.usersearch || null;
 
   const userInputs = req.query;
   const fields = ["companyName", "position", "startDate", "endDate"];
@@ -51,6 +52,12 @@ exports.getExperiences = asyncHandler(async (req, res) => {
       }
     }
   });
+
+  if (valueRequired(isUser)) {
+    if (isUser === true || isUser == "true") {
+      query.find({ pkey: req.userId });
+    }
+  }
 
   if (valueRequired(pkey)) {
     const userData = await memberSearch(pkey);

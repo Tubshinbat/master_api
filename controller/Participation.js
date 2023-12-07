@@ -34,6 +34,7 @@ exports.getParticipations = asyncHandler(async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
   let sort = req.query.sort || { date: 1 };
   const select = req.query.select;
+  const isUser = req.query.usersearch || null;
 
   const userInputs = req.query;
   const fields = ["name", "date"];
@@ -42,6 +43,12 @@ exports.getParticipations = asyncHandler(async (req, res) => {
   const pkey = req.query.pkey;
 
   const query = Participation.find();
+
+  if (valueRequired(isUser)) {
+    if (isUser === true || isUser == "true") {
+      query.find({ pkey: req.userId });
+    }
+  }
 
   fields.map((field) => {
     if (valueRequired(userInputs[field])) {

@@ -23,6 +23,10 @@ exports.createMember = asyncHandler(async (req, res, next) => {
     if (user) req.body.partner = user.partner;
   }
 
+  if (req.body.partner === null || req.body.partner === "null") {
+    req.body.partner = null;
+  }
+
   const uniqueEmail = await Members.find({
     email: req.body.email,
   });
@@ -481,6 +485,10 @@ exports.updateMember = asyncHandler(async (req, res, next) => {
   }
 
   if (!valueRequired(req.body.partner)) {
+    req.body.partner = null;
+  }
+
+  if (req.body.partner === null || req.body.partner === "null") {
     req.body.partner = null;
   }
 
