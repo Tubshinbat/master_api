@@ -7,7 +7,8 @@ const { valueRequired } = require("../lib/check");
 const { userSearch, RegexOptions } = require("../lib/searchOfterModel");
 
 exports.createParticipation = asyncHandler(async (req, res) => {
-  req.body.createUser = req.userId;
+  if (req.userFront === true) req.body.pkey = req.userId;
+  else req.body.createUser = req.userId;
 
   const participation = await Participation.create(req.body);
   res.status(200).json({
@@ -23,6 +24,17 @@ exports.getParticipation = asyncHandler(async (req, res) => {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
+  if (req.userFront) {
+    const data = await Participation.find({
+      _id: req.params.id,
+      pkey: req.userId,
+    });
+
+    if (!valueRequired(data)) {
+      throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
+    }
+  }
+
   res.status(200).json({
     success: true,
     data: participation,
@@ -34,7 +46,6 @@ exports.getParticipations = asyncHandler(async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
   let sort = req.query.sort || { date: 1 };
   const select = req.query.select;
-  const isUser = req.query.usersearch || null;
 
   const userInputs = req.query;
   const fields = ["name", "date"];
@@ -44,10 +55,8 @@ exports.getParticipations = asyncHandler(async (req, res) => {
 
   const query = Participation.find();
 
-  if (valueRequired(isUser)) {
-    if (isUser === true || isUser == "true") {
-      query.find({ pkey: req.userId });
-    }
+  if (req.userFront) {
+    query.find({ pkey: req.userId });
   }
 
   fields.map((field) => {
@@ -119,15 +128,19 @@ exports.updateParticipation = asyncHandler(async (req, res) => {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
-  const ok = await Participation.findOne({
-    _id: req.params.id,
-    pkey: req.userId,
-  });
+  if (valueRequired(req.userFront)) {
+    const ok = await Participation.findOne({
+      _id: req.params.id,
+      pkey: req.userId,
+    });
 
-  if (req.userRole === "member" && !valueRequired(ok)) {
-    throw new MyError("Хандах эрхгүй байна", 400);
+    if (!valueRequired(ok)) {
+      throw new MyError("Хандах эрхгүй байна", 400);
+    }
+  } else {
+    req.body.updateUser = req.userId;
   }
-  req.body.updateUser = req.userId;
+
   req.body.updateAt = Date.now();
 
   participation = await Participation.findByIdAndUpdate(
@@ -146,20 +159,19 @@ exports.updateParticipation = asyncHandler(async (req, res) => {
 });
 
 exports.deleteParticipation = asyncHandler(async (req, res) => {
-  const ok = await Participation.findOne({
-    _id: req.params.id,
-    pkey: req.userId,
-  });
+  if (!participation) throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
 
-  if (req.userRole === "member" && !valueRequired(ok)) {
-    throw new MyError("Хандах эрхгүй байна", 400);
+  if (valueRequired(req.userFront)) {
+    const ok = await Participation.findOne({
+      _id: req.params.id,
+      pkey: req.userId,
+    });
+
+    if (!valueRequired(ok))
+      throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
   let participation = await Participation.findById(req.params.id);
-
-  if (!participation) {
-    throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
-  }
 
   participation.pictures &&
     participation.pictures.length > 0 &&

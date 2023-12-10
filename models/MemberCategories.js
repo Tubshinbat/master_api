@@ -6,12 +6,19 @@ const MemberCategoriesSchema = new mongoose.Schema({
     enum: [true, false],
     default: true,
   },
+
   parentId: {
     type: String,
   },
+
   position: {
     type: Number,
   },
+
+  icon: {
+    type: String,
+  },
+
   code: {
     type: Number,
   },
@@ -22,14 +29,6 @@ const MemberCategoriesSchema = new mongoose.Schema({
 
   slug: {
     type: String,
-  },
-
-  parentId: {
-    type: String,
-  },
-
-  position: {
-    type: Number,
   },
 
   createAt: {

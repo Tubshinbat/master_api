@@ -6,6 +6,14 @@ const ProductRateSchema = new mongoose.Schema({
     ref: "Products",
   },
 
+  name: {
+    type: String,
+  },
+
+  comment: {
+    type: String,
+  },
+
   phoneNumber: {
     type: Number,
   },

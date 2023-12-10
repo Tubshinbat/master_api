@@ -14,6 +14,14 @@ const MemberRateSchema = new mongoose.Schema({
     type: Number,
   },
 
+  name: {
+    type: String,
+  },
+
+  comment: {
+    type: String,
+  },
+
   createAt: {
     type: Date,
     default: Date.now,

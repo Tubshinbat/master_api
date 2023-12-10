@@ -8,6 +8,7 @@ exports.createMenu = asyncHandler(async (req, res, next) => {
   const parentId = req.body.parentId || null;
   const name = req.body.name;
   let position = 0;
+
   if (parentId) {
     const category = await Menu.findOne({ parentId }).sort({
       position: -1,

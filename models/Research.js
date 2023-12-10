@@ -38,7 +38,7 @@ const ResearchSchema = new mongoose.Schema({
 
   pkey: {
     type: mongoose.Schema.ObjectId,
-    ref: "User",
+    ref: "Members",
   },
 
   createUser: {

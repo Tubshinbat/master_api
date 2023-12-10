@@ -16,6 +16,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
   const tokenObject = jwt.verify(token, process.env.JWT_SECRET);
   req.userId = tokenObject.id;
   req.userRole = tokenObject.role;
+  req.userFront = tokenObject.userFront || false;
   next();
 });
 

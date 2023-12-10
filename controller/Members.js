@@ -488,10 +488,6 @@ exports.updateMember = asyncHandler(async (req, res, next) => {
     req.body.partner = null;
   }
 
-  if (req.body.partner === null || req.body.partner === "null") {
-    req.body.partner = null;
-  }
-
   if (
     req.userRole !== "partner" &&
     req.memberTokenIs === true &&
@@ -508,7 +504,12 @@ exports.updateMember = asyncHandler(async (req, res, next) => {
     }
   }
 
-  req.body.updateUser = req.userId;
+  if (req.userFront) {
+    req.body.status = member.status;
+  } else {
+    req.body.updateUser = req.userId;
+  }
+
   req.body.updateAt = Date.now();
 
   if (req.body.picture && req.body.length > 1) {
@@ -520,6 +521,8 @@ exports.updateMember = asyncHandler(async (req, res, next) => {
       req.body.partner = null;
     }
   }
+
+  console.log(req.body);
 
   member = await Members.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
@@ -573,10 +576,6 @@ exports.login = asyncHandler(async (req, res, next) => {
       402
     );
   }
-
-  // if (user.status === false) {
-  //   throw new MyError("Уучлаарай таны эрхийг хаасан байна.");
-  // }
 
   const token = user.getJsonWebToken();
   req.token = token;

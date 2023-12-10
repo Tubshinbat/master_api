@@ -7,7 +7,8 @@ const { valueRequired } = require("../lib/check");
 const { userSearch, RegexOptions } = require("../lib/searchOfterModel");
 
 exports.createReward = asyncHandler(async (req, res) => {
-  req.body.createUser = req.userId;
+  if (req.userFront) req.body.pkey = req.userId;
+  else req.body.createUser = req.userId;
 
   const reward = await Reward.create(req.body);
   res.status(200).json({
@@ -19,8 +20,11 @@ exports.createReward = asyncHandler(async (req, res) => {
 exports.getReward = asyncHandler(async (req, res) => {
   let reward = await Reward.findById(req.params.id);
 
-  if (!reward) {
-    throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
+  if (!reward) throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
+
+  if (req.userFront) {
+    const ok = await Reward.findOne({ _id: req.params.id, pkey: req.userId });
+    if (!ok) throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
   res.status(200).json({
@@ -34,7 +38,6 @@ exports.getRewards = asyncHandler(async (req, res) => {
   const limit = parseInt(req.query.limit) || 24;
   let sort = req.query.sort || { createAt: -1 };
   const select = req.query.select;
-  const isUser = req.query.usersearch || null;
 
   const userInputs = req.query;
   const fields = ["name", "date"];
@@ -43,10 +46,8 @@ exports.getRewards = asyncHandler(async (req, res) => {
   const pkey = req.query.pkey;
   const query = Reward.find();
 
-  if (valueRequired(isUser)) {
-    if (isUser === true || isUser == "true") {
-      query.find({ pkey: req.userId });
-    }
+  if (req.userFront) {
+    query.find({ pkey: req.userId });
   }
 
   fields.map((field) => {
@@ -114,20 +115,13 @@ exports.getRewards = asyncHandler(async (req, res) => {
 exports.updateReward = asyncHandler(async (req, res) => {
   let reward = await Reward.findById(req.params.id);
 
-  if (!reward) {
-    throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
-  }
+  if (!reward) throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
 
-  const ok = await Reward.findOne({
-    _id: req.params.id,
-    pkey: req.userId,
-  });
+  if (req.userFront) {
+    const ok = await Reward.findOne({ _id: req.params.id, pkey: req.userId });
+    if (!ok) throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
+  } else req.body.updateUser = req.userId;
 
-  if (req.userRole === "member" && !valueRequired(ok)) {
-    throw new MyError("Хандах эрхгүй байна", 400);
-  }
-
-  req.body.updateUser = req.userId;
   req.body.updateAt = Date.now();
 
   reward = await Reward.findByIdAndUpdate(req.params.id, req.body, {
@@ -144,17 +138,14 @@ exports.updateReward = asyncHandler(async (req, res) => {
 exports.deleteReward = asyncHandler(async (req, res) => {
   let reward = await Reward.findById(req.params.id);
 
-  if (!reward) {
-    throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
-  }
+  if (!reward) throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
 
-  const ok = await Reward.findOne({
-    _id: req.params.id,
-    pkey: req.userId,
-  });
-
-  if (req.userRole === "member" && !valueRequired(ok)) {
-    throw new MyError("Хандах эрхгүй байна", 400);
+  if (req.userFront) {
+    const ok = await Reward.findOne({
+      _id: req.params.id,
+      pkey: req.userId,
+    });
+    if (!ok) throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
   reward.pictures &&

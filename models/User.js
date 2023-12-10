@@ -124,6 +124,7 @@ UserSchema.methods.getJsonWebToken = function () {
       phoneNumber: this.phoneNumber,
       email: this.email,
       avatar: this.image,
+      userFront: false,
     },
     process.env.JWT_SECRET,
     {

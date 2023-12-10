@@ -6,7 +6,7 @@ const paginate = require("../utils/paginate");
 const { valueRequired } = require("../lib/check");
 const { userSearch, RegexOptions } = require("../lib/searchOfterModel");
 
-exports.createContact = asyncHandler(async (req, res, next) => {
+exports.createContact = asyncHandler(async (req, res) => {
   const contact = await Contact.create(req.body);
   res.status(200).json({
     success: true,
@@ -14,7 +14,7 @@ exports.createContact = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.getContacts = asyncHandler(async (req, res, next) => {
+exports.getContacts = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 25;
   let sort = req.query.sort || { createAt: -1 };
@@ -31,8 +31,8 @@ exports.getContacts = asyncHandler(async (req, res, next) => {
   fields.map((field) => {
     if (valueRequired(userInputs[field])) {
       const arrayList = userInputs[field].split(",");
-      if (arrayList > 1) query.find({ field: { $in: arrayList } });
-      else query.find({ field: RegexOptions(userInputs[field]) });
+      if (arrayList > 1) query.find({ [field]: { $in: arrayList } });
+      else query.find({ [field]: RegexOptions(userInputs[field]) });
     }
   });
 
@@ -49,19 +49,21 @@ exports.getContacts = asyncHandler(async (req, res, next) => {
   if (valueRequired(sort)) {
     if (typeof sort === "string") {
       const spliteSort = sort.split(":");
-      let convertSort = {};
+      let convertSort = { createAt: -1 };
       if (spliteSort[1] === "ascend") {
         convertSort = { [spliteSort[0]]: 1 };
       } else {
         convertSort = { [spliteSort[0]]: -1 };
       }
-      if (spliteSort[0] != "undefined") query.sort(convertSort);
+      if (!valueRequired(spliteSort[0])) query.sort(convertSort);
     } else {
       query.sort(sort);
     }
   }
 
   query.select(select);
+  query.populate("createUser");
+  query.populate("updateUser");
 
   const qc = query.toConstructor();
   const clonedQuery = new qc();
@@ -80,7 +82,7 @@ exports.getContacts = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.getFullData = asyncHandler(async (req, res, next) => {
+exports.getFullData = asyncHandler(async (req, res) => {
   let sort = req.query.sort || { createAt: -1 };
   const select = req.query.select;
 
@@ -124,9 +126,9 @@ exports.getFullData = asyncHandler(async (req, res, next) => {
       query.sort(sort);
     }
   }
-
+  query.populate("createUser");
+  query.populate("updateUser");
   query.select(select);
-
   const contacts = await query.exec();
 
   res.status(200).json({
@@ -136,7 +138,7 @@ exports.getFullData = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.multDeleteContact = asyncHandler(async (req, res, next) => {
+exports.multDeleteContact = asyncHandler(async (req, res) => {
   const ids = req.queryPolluted.id;
   const findContact = await Contact.find({ _id: { $in: ids } });
 
@@ -151,7 +153,7 @@ exports.multDeleteContact = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.getContact = asyncHandler(async (req, res, next) => {
+exports.getContact = asyncHandler(async (req, res) => {
   const contact = await Contact.findByIdAndUpdate(req.params.id);
 
   if (!contact) {
@@ -164,7 +166,7 @@ exports.getContact = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.updateContact = asyncHandler(async (req, res, next) => {
+exports.updateContact = asyncHandler(async (req, res) => {
   let contact = await Contact.findById(req.params.id);
 
   if (!contact) {
@@ -185,7 +187,7 @@ exports.updateContact = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.getCountContact = asyncHandler(async (req, res, next) => {
+exports.getCountContact = asyncHandler(async (req, res) => {
   const contact = await Contact.count();
   res.status(200).json({
     success: true,

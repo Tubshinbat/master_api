@@ -36,6 +36,11 @@ const ContactSchema = new mongoose.Schema({
     default: Date.now,
   },
 
+  createUser: {
+    type: mongoose.Schema.ObjectId,
+    ref: "User",
+  },
+
   updateUser: {
     type: mongoose.Schema.ObjectId,
     ref: "User",

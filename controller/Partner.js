@@ -189,31 +189,33 @@ exports.multDeletePartner = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.getPartner = asyncHandler(async (req, res, next) => {
-  if (
-    req.memberTokenIs === true &&
-    req.isMember === true &&
-    req.userRole !== "partner"
-  ) {
-    throw new MyError("Хандах эрхгүй байна", 400);
-  }
+exports.getPartner = asyncHandler(async (req, res) => {
+  // if (!req.userFront) {
+  //   if (
+  //     req.memberTokenIs === true &&
+  //     req.isMember === true &&
+  //     req.userRole !== "partner"
+  //   ) {
+  //     throw new MyError("Хандах эрхгүй байна", 400);
+  //   }
+  // }
 
   const partner = await Partner.findByIdAndUpdate(req.params.id)
     .populate("createUser")
     .populate("updateUser")
     .populate("category");
 
-  if (
-    req.memberTokenIs === true &&
-    req.isMember === true &&
-    req.userRole === "partner"
-  ) {
-    const user = await Members.findById(req.userId);
-    console.log(user.partner.toString() !== partner._id.toString());
-    if (user.partner.toString() !== partner._id.toString()) {
-      throw new MyError("Хандах эрхгүй байна", 400);
-    }
-  }
+  // if (
+  //   req.memberTokenIs === true &&
+  //   req.isMember === true &&
+  //   req.userRole === "partner"
+  // ) {
+  //   const user = await Members.findById(req.userId);
+  //   console.log(user.partner.toString() !== partner._id.toString());
+  //   if (user.partner.toString() !== partner._id.toString()) {
+  //     throw new MyError("Хандах эрхгүй байна", 400);
+  //   }
+  // }
 
   if (!partner) {
     throw new MyError("Тухайн мэдээ олдсонгүй. ", 404);
@@ -230,25 +232,6 @@ exports.updatePartner = asyncHandler(async (req, res, next) => {
 
   if (!partner) {
     throw new MyError("Тухайн мэдээ олдсонгүй. ", 404);
-  }
-
-  if (
-    req.memberTokenIs === true &&
-    req.isMember === true &&
-    req.userRole !== "partner"
-  ) {
-    throw new MyError("Хандах эрхгүй байна", 400);
-  }
-
-  if (
-    req.memberTokenIs === true &&
-    req.isMember === true &&
-    req.userRole === "partner"
-  ) {
-    const user = await Members.findById(req.userId);
-    if (user.partner.toString() !== partner._id.toString()) {
-      throw new MyError("Хандах эрхгүй байна", 400);
-    }
   }
 
   if (valueRequired(req.body.cover) === false) {

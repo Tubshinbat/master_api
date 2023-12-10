@@ -7,9 +7,11 @@ const { valueRequired } = require("../lib/check");
 const { userSearch, RegexOptions } = require("../lib/searchOfterModel");
 
 exports.createResearch = asyncHandler(async (req, res) => {
-  req.body.createUser = req.userId;
+  if (req.userFront) req.body.pkey = req.userId;
+  else req.body.createUser = req.userId;
 
   const research = await Research.create(req.body);
+
   res.status(200).json({
     success: true,
     data: research,
@@ -23,6 +25,11 @@ exports.getResearch = asyncHandler(async (req, res) => {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
+  if (req.userFront) {
+    const ok = await Research.find({ _id: req.params.id, pkey: req.userId });
+    if (!ok) throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
+  }
+
   res.status(200).json({
     success: true,
     data: research,
@@ -34,7 +41,6 @@ exports.getResearchs = asyncHandler(async (req, res) => {
   const limit = parseInt(req.query.limit) || 24;
   let sort = req.query.sort || { createAt: -1 };
   const select = req.query.select;
-  const isUser = req.query.usersearch || null;
 
   const userInputs = req.query;
   const fields = ["name", "date"];
@@ -43,10 +49,8 @@ exports.getResearchs = asyncHandler(async (req, res) => {
   const pkey = req.query.pkey;
   const query = Research.find();
 
-  if (valueRequired(isUser)) {
-    if (isUser === true || isUser == "true") {
-      query.find({ pkey: req.userId });
-    }
+  if (req.userFront) {
+    query.find({ pkey: req.userId });
   }
 
   fields.map((field) => {
@@ -116,13 +120,15 @@ exports.updateResearch = asyncHandler(async (req, res) => {
   if (!research) {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
-  const ok = await Research.findOne({
-    _id: req.params.id,
-    pkey: req.userId,
-  });
 
-  if (req.userRole === "member" && !valueRequired(ok)) {
-    throw new MyError("Хандах эрхгүй байна", 400);
+  if (req.userFront) {
+    const ok = await Research.findOne({
+      _id: req.params.id,
+      pkey: req.userId,
+    });
+
+    if (!valueRequired(ok))
+      throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
   req.body.updateUser = req.userId;
@@ -142,17 +148,16 @@ exports.updateResearch = asyncHandler(async (req, res) => {
 exports.deleteResearch = asyncHandler(async (req, res) => {
   let research = await Research.findById(req.params.id);
 
-  if (!research) {
-    throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
-  }
+  if (!research) throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
 
-  const ok = await Research.findOne({
-    _id: req.params.id,
-    pkey: req.userId,
-  });
+  if (req.userFront) {
+    const ok = await Research.findOne({
+      _id: req.params.id,
+      pkey: req.userId,
+    });
 
-  if (req.userRole === "member" && !valueRequired(ok)) {
-    throw new MyError("Хандах эрхгүй байна", 400);
+    if (!valueRequired(ok))
+      throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
   research.pictures &&

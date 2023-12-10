@@ -159,6 +159,7 @@ MembersSchema.methods.getJsonWebToken = function () {
       name: this.name,
       phoneNumber: this.phoneNumber,
       email: this.email,
+      userFront: true,
     },
     process.env.JWT_SECRET,
     {

@@ -1,60 +1,61 @@
-const Experience = require("../models/Experience");
+const ContactLink = require("../models/ContactLinks");
 const MyError = require("../utils/myError");
 const asyncHandler = require("express-async-handler");
 const paginate = require("../utils/paginate");
-const { imageDelete } = require("../lib/photoUpload");
+
 const { valueRequired } = require("../lib/check");
 const { userSearch, RegexOptions } = require("../lib/searchOfterModel");
 
-exports.createExperience = asyncHandler(async (req, res) => {
+exports.createContactLink = asyncHandler(async (req, res) => {
   req.userFront === true
     ? (req.body.pkey = req.userId)
     : (req.body.createUser = req.userId);
 
-  const experience = await Experience.create(req.body);
+  const contact = await ContactLink.create(req.body);
   res.status(200).json({
     success: true,
-    data: experience,
+    data: contact,
   });
 });
 
-exports.getExperience = asyncHandler(async (req, res) => {
-  let experience = await Experience.findById(req.params.id);
+exports.getContactLink = asyncHandler(async (req, res) => {
+  const contactLink = await ContactLink.findById(req.params.id);
 
-  if (!experience) {
+  if (!valueRequired(contactLink))
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
-  }
 
-  if (req.userFront == true) {
-    const isCheck = await Experience.find({
+  if (req.userFront === true) {
+    const ok = await ContactLink.findOne({
       _id: req.params.id,
-      pkey: req.userId,
+      pkey: req.userRole,
     });
 
-    if (!valueRequired(isCheck))
+    if (!valueRequired(ok))
       throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
   res.status(200).json({
     success: true,
-    data: experience,
+    data: contactLink,
   });
 });
 
-exports.getExperiences = asyncHandler(async (req, res) => {
+exports.getContactLinks = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  let sort = req.query.sort || { startDate: 1 };
+  const limit = parseInt(req.query.limit) || 25;
+  let sort = req.query.sort || { createAt: -1 };
+  const select = req.query.select;
 
+  //  FIELDS
   const userInputs = req.query;
-  const fields = ["companyName", "position", "startDate", "endDate"];
+  const fields = ["name", "link"];
   const createUser = req.query.createUser;
   const updateUser = req.query.updateUser;
   const pkey = req.query.pkey;
 
-  const query = Experience.find();
+  const query = ContactLink.find();
 
-  if (req.userFront) {
+  if (req.userFront === true) {
     query.find({ pkey: req.userId });
   }
 
@@ -62,9 +63,7 @@ exports.getExperiences = asyncHandler(async (req, res) => {
     if (valueRequired(userInputs[field])) {
       const arrayList = userInputs[field].split(",");
       if (arrayList > 1) query.find({ [field]: { $in: arrayList } });
-      else {
-        query.find({ [field]: RegexOptions(userInputs[field]) });
-      }
+      else query.find({ [field]: RegexOptions(userInputs[field]) });
     }
   });
 
@@ -86,15 +85,13 @@ exports.getExperiences = asyncHandler(async (req, res) => {
   if (valueRequired(sort)) {
     if (typeof sort === "string") {
       const spliteSort = sort.split(":");
-      let convertSort = { startDate: 1 };
+      let convertSort = { createAt: -1 };
       if (spliteSort[1] === "ascend") {
         convertSort = { [spliteSort[0]]: 1 };
       } else {
         convertSort = { [spliteSort[0]]: -1 };
       }
-
-      if (spliteSort[0] != "undefined") query.sort(convertSort);
-      else if (spliteSort[0] == "undefined") query.sort({ startDate: 1 });
+      if (!valueRequired(spliteSort[0])) query.sort(convertSort);
     } else {
       query.sort(sort);
     }
@@ -108,69 +105,67 @@ exports.getExperiences = asyncHandler(async (req, res) => {
   const clonedQuery = new qc();
   const result = await clonedQuery.count();
 
-  const pagination = await paginate(page, limit, Experience, result);
+  const pagination = await paginate(page, limit, ContactLink, result);
   query.limit(limit);
   query.skip(pagination.start - 1);
-  let experience = await query.exec();
+  let contactLinks = await query.exec();
 
   res.status(200).json({
     success: true,
-    count: experience.length,
-    data: experience,
+    count: contactLinks.length,
+    data: contactLinks,
     pagination,
   });
 });
 
-exports.updateExperience = asyncHandler(async (req, res) => {
-  let experience = await Experience.findById(req.params.id);
+exports.updateContactLinks = asyncHandler(async (req, res) => {
+  let contactLink = await ContactLink.findById(req.params.id);
 
-  if (!experience) throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
+  if (!valueRequired(contactLink))
+    throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
 
-  if (req.userFront == true) {
-    const ok = await Experience.findOne({
+  if (req.userFront === true) {
+    const data = await ContactLink.findOne({
       _id: req.params.id,
       pkey: req.userId,
     });
-
-    if (!valueRequired(ok))
+    if (!valueRequired(data))
       throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
+  } else {
+    req.body.updateUser = req.userId;
   }
 
-  if (req.userFront) req.body.pkey = req.userId;
-  else req.body.updateUser = req.userId;
   req.body.updateAt = Date.now();
 
-  experience = await Experience.findByIdAndUpdate(req.params.id, req.body, {
+  contactLink = await ContactLink.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
   });
 
   res.status(200).json({
     success: true,
-    data: experience,
+    data: contactLink,
   });
 });
 
-exports.deleteExperience = asyncHandler(async (req, res) => {
-  let experience = await Experience.findById(req.params.id);
-
-  if (!experience) throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
-
-  if (req.userFront) {
-    const ok = await Experience.findOne({
+exports.deleteContactLink = asyncHandler(async (req, res) => {
+  if (req.userFront === true) {
+    const data = await ContactLink.findOne({
       _id: req.params.id,
       pkey: req.userId,
     });
-
-    if (!valueRequired(ok))
+    if (!valueRequired(data))
       throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
-  experience.companyLogo && (await imageDelete(experience.companyLogo));
-  experience.remove();
+  let contactLink = await ContactLink.findById(req.params.id);
+  if (!valueRequired(contactLink))
+    throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
+
+  contactLink.remove();
 
   res.status(200).json({
     success: true,
-    data: experience,
+    data: contactLink,
   });
 });

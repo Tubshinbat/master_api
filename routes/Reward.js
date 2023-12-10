@@ -11,15 +11,12 @@ const {
 } = require("../controller/Reward");
 const { memberProtect, memberRoles } = require("../middleware/memberRoles");
 
-router
-  .route("/")
-  .post(memberProtect, memberRoles, createReward)
-  .get(memberProtect, getRewards);
+router.route("/").post(protect, createReward).get(memberProtect, getRewards);
 
 router
   .route("/:id")
-  .get(memberProtect, memberRoles, getReward)
-  .put(memberProtect, memberRoles, updateReward)
-  .delete(memberProtect, memberRoles, deleteReward);
+  .get(memberProtect, getReward)
+  .put(protect, updateReward)
+  .delete(protect, deleteReward);
 
 module.exports = router;

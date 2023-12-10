@@ -31,6 +31,10 @@ const PartnerSchema = new mongoose.Schema({
     },
   ],
 
+  cover: {
+    type: String,
+  },
+
   logo: {
     type: String,
   },

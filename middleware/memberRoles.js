@@ -28,8 +28,14 @@ exports.memberProtect = asyncHandler(async (req, res, next) => {
     try {
       const tokenObject = jwt.verify(token, process.env.JWT_SECRET);
       req.userId = tokenObject.id;
-      req.userRole = tokenObject.role;
-      req.memberTokenIs = true;
+      req.memberRole = tokenObject.role;
+      req.userFront = tokenObject.userFront || false;
+      if (
+        valueRequired(req.query.usersearch) &&
+        (req.query.usersearch == true || req.query.usersearch == "true")
+      ) {
+        req.userFront = false;
+      }
     } catch {
       next();
     }
