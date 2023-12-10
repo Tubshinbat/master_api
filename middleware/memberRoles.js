@@ -35,6 +35,8 @@ exports.memberProtect = asyncHandler(async (req, res, next) => {
         (req.query.usersearch == true || req.query.usersearch == "true")
       ) {
         req.userFront = false;
+      } else {
+        req.userFront = true;
       }
     } catch {
       next();
