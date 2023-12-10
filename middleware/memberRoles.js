@@ -21,6 +21,15 @@ exports.memberProtect = asyncHandler(async (req, res, next) => {
     token = req.cookies["nodetoken"];
   }
 
+  if (
+    valueRequired(req.query.usersearch) &&
+    (req.query.usersearch == true || req.query.usersearch == "true")
+  ) {
+    req.userFront = true;
+  } else {
+    req.userFront = false;
+  }
+
   if (!token || !valueRequired(token)) {
     req.memberTokenIs = false;
     // throw new MyError("Уучлаарай хандах боломжгүй байна..", 400);
@@ -29,15 +38,7 @@ exports.memberProtect = asyncHandler(async (req, res, next) => {
       const tokenObject = jwt.verify(token, process.env.JWT_SECRET);
       req.userId = tokenObject.id;
       req.memberRole = tokenObject.role;
-      req.userFront = tokenObject.userFront || false;
-      if (
-        valueRequired(req.query.usersearch) &&
-        (req.query.usersearch == true || req.query.usersearch == "true")
-      ) {
-        req.userFront = false;
-      } else {
-        req.userFront = true;
-      }
+      // req.userFront = tokenObject.userFront || false;
     } catch {
       next();
     }
