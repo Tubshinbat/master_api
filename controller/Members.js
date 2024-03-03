@@ -215,7 +215,7 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
       let convertSort = { createAt: -1 };
       if (spliteSort[1] === "ascend") {
         convertSort = { [spliteSort[0]]: 1 };
-      } else {
+      } else if (spliteSort[1] === "descend") {
         convertSort = { [spliteSort[0]]: -1 };
       }
       if (spliteSort[0] != "undefined") query.sort(convertSort);
