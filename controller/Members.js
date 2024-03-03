@@ -212,13 +212,14 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
   if (valueRequired(sort)) {
     if (typeof sort === "string") {
       const spliteSort = sort.split(":");
-      let convertSort = {};
+      let convertSort = { createAt: -1 };
       if (spliteSort[1] === "ascend") {
         convertSort = { [spliteSort[0]]: 1 };
       } else {
         convertSort = { [spliteSort[0]]: -1 };
       }
       if (spliteSort[0] != "undefined") query.sort(convertSort);
+      else query.sort(convertSort);
     } else {
       query.sort(sort);
     }
