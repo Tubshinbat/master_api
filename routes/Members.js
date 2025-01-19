@@ -33,6 +33,7 @@ router
   .get(getMembers);
 
 router.route("/getmembers").get(memberProtect, memberRoles, getMembers);
+
 router
   .route("/memberpasswordchange")
   .put(memberProtect, memberRoles, changeMemberPassword);

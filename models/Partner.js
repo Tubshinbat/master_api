@@ -35,6 +35,20 @@ const PartnerSchema = new mongoose.Schema({
     type: String,
   },
 
+  teachers: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "Members",
+    },
+  ],
+
+  course: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "Course",
+    },
+  ],
+
   logo: {
     type: String,
   },

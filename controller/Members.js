@@ -134,16 +134,19 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
   const categories = req.query.categories;
   const category = req.query.category;
   const partner = req.query.partner;
+  const partnerGet = req.query.partnerGet;
   const createUser = req.query.createUser;
   const updateUser = req.query.updateUser;
   let status = req.query.status || null;
   let memberShip = req.query.memberShip;
   const name = req.query.name;
 
+  console.log(partnerId);
+
   const query = Members.find();
 
-  if (valueRequired(partnerId)) {
-    query.where("partner").equals(partnerId);
+  if (valueRequired(partnerGet)) {
+    query.where("partner").in(partnerGet);
   }
 
   if (valueRequired(status)) {
@@ -177,7 +180,6 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
 
   if (valueRequired(categories)) {
     const arrayList = categories.split(",");
-
     query.where("category").in(arrayList);
   }
 
@@ -506,7 +508,6 @@ exports.updateMember = asyncHandler(async (req, res, next) => {
   }
 
   if (req.userFront) {
-    req.body.status = member.status;
   } else {
     req.body.updateUser = req.userId;
   }

@@ -35,6 +35,8 @@ const fileRouters = require("./routes/File");
 const rateRouters = require("./routes/MemberRate");
 const productRateRouters = require("./routes/ProductRate");
 const productRouters = require("./routes/Products");
+const courseRouters = require("./routes/Course");
+
 const errorHandler = require("./middleware/error");
 const connectDB = require("./config/db");
 
@@ -142,6 +144,7 @@ app.use("/api/v1/participations", participationRouters);
 app.use("/api/v1/rewards", rewardRouters);
 app.use("/api/v1/researchs", researchRouters);
 app.use("/api/v1/products", productRouters);
+app.use("/api/v1/course", courseRouters);
 app.use(errorHandler);
 // Алдаа үүсэхэд барьж авч алдааны мэдээллийг клиент тал руу автоматаар мэдээлнэ
 
