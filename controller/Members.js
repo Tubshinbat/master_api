@@ -564,7 +564,9 @@ exports.login = asyncHandler(async (req, res, next) => {
   // Тухайн хэрэглэгчийг хайх
   let user = null;
   if (email) {
-    user = await Members.findOne({ email }).select("+password");
+    user = await Members.findOne({
+      email: { $regex: new RegExp(`^${email}$`, "i") },
+    }).select("+password");
   } else if (phoneNumber) {
     user = await Members.findOne({ phoneNumber }).select("+password");
   }
