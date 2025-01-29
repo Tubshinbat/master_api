@@ -547,40 +547,47 @@ exports.getCountMember = asyncHandler(async (req, res, next) => {
 
 exports.login = asyncHandler(async (req, res, next) => {
   let { email, password, phoneNumber } = req.body;
-  if (valueRequired(email)) email = email.toLowerCase();
 
-  // Оролтыгоо шалгана
-
-  if (!email || !password) {
-    if (!password || !phoneNumber) {
-      throw new MyError(
-        "Имэйл эсвэл утасны дугаар болон нууц үгээ оруулна уу",
-        400
-      );
-    }
+  // Оролтын утгуудыг шалгах
+  if (!email && !phoneNumber) {
+    throw new MyError("Имэйл эсвэл утасны дугаар оруулна уу", 400);
   }
 
-  // Тухайн хэрэглэгчийг хайна
-  let user = await Members.findOne({ email }).select("+password");
+  if (!password) {
+    throw new MyError("Нууц үгээ оруулна уу", 400);
+  }
+
+  if (email) {
+    email = email.toLowerCase();
+  }
+
+  // Тухайн хэрэглэгчийг хайх
+  let user = null;
+  if (email) {
+    user = await Members.findOne({ email }).select("+password");
+  } else if (phoneNumber) {
+    user = await Members.findOne({ phoneNumber }).select("+password");
+  }
 
   if (!user) {
-    user = await Members.findOne({ phoneNumber }).select("+password");
-    if (!user) {
-      throw new MyError("Имэйл болон нууц үгээ зөв оруулна уу", 401);
-    }
+    throw new MyError("Хэрэглэгч олдсонгүй", 404);
+  }
+
+  // Нууц үгийг шалгах
+  if (!user.password) {
+    throw new MyError("Нууц үг олдсонгүй", 401);
   }
 
   const ok = await user.checkPassword(password);
 
   if (!ok) {
-    throw new MyError(
-      "Имэйл эсвэл утасны дугаар болон нууц үгээ зөв оруулна уу",
-      402
-    );
+    throw new MyError("Нууц үг буруу байна", 401);
   }
 
+  // Токен үүсгэх
   const token = user.getJsonWebToken();
   req.token = token;
+
   const cookieOption = {
     expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
     httpOnly: false,
