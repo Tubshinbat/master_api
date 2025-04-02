@@ -1,50 +1,68 @@
 const mongoose = require("mongoose");
 
-const ContactSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, "Та өөрийн нэрийг заавал оруулах шаардлагатай."],
-  },
+const ContactSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, "Та өөрийн нэрийг заавал оруулах шаардлагатай."],
+      trim: true,
+    },
 
-  email: {
-    type: String,
-    match: [
-      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
-      "Имэйл хаягаа буруу оруулсан байна",
-    ],
-  },
+    email: {
+      type: String,
+      trim: true,
+      match: [
+        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+        "Имэйл хаягаа буруу оруулсан байна",
+      ],
+    },
 
-  phoneNumber: {
-    type: Number,
-    trim: true,
-    required: [true, "Хэрэглэгчинй имэйл хаягийг оруулж өгнө үү"],
-  },
+    phoneNumber: {
+      type: String,
+      required: [true, "Утасны дугаараа оруулна уу"],
+      trim: true,
+      match: [/^[0-9+]{6,20}$/, "Утасны дугаар буруу байна"],
+    },
 
-  message: {
-    type: String,
-    required: [true, "Санал хүсэлтээ бичнэ үү"],
-    trim: true,
-  },
+    subject: {
+      type: String,
+      trim: true,
+      required: [true, "Санал хүсэлтийн сэдвийг оруулна уу"],
+    },
 
-  createAt: {
-    type: Date,
-    default: Date.now,
-  },
+    message: {
+      type: String,
+      required: [true, "Санал хүсэлтээ бичнэ үү"],
+      trim: true,
+    },
 
-  updateAt: {
-    type: Date,
-    default: Date.now,
-  },
+    type: {
+      type: String,
+      enum: ["general", "support", "complaint", "business"],
+      default: "general",
+    },
 
-  createUser: {
-    type: mongoose.Schema.ObjectId,
-    ref: "User",
-  },
+    status: {
+      type: String,
+      enum: ["pending", "read", "archived"],
+      default: "pending",
+    },
 
-  updateUser: {
-    type: mongoose.Schema.ObjectId,
-    ref: "User",
+    reply: {
+      message: { type: String, trim: true },
+      createdAt: { type: Date },
+      createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    },
+
+    ip: { type: String, trim: true },
+    userAgent: { type: String, trim: true },
+
+    isDeleted: { type: Boolean, default: false },
+
+    createUser: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    updateUser: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
-});
+  { timestamps: true }
+);
 
 module.exports = mongoose.model("Contact", ContactSchema);

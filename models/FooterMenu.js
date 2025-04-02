@@ -1,75 +1,88 @@
 const mongoose = require("mongoose");
 const { slugify } = require("transliteration");
 
-const FooterMenuSchema = new mongoose.Schema({
-  status: {
-    type: Boolean,
-    enum: [true, false],
-    default: true,
-  },
+const FooterMenuSchema = new mongoose.Schema(
+  {
+    status: { type: Boolean, default: true },
 
-  cover: {
-    type: String,
-  },
+    isDirect: { type: Boolean, default: false },
+    isModel: { type: Boolean, default: false },
+    inWindow: { type: Boolean, default: false },
+    mainLink: { type: Boolean, default: true },
 
-  isDirect: {
-    type: Boolean,
-    enum: [true, false],
-    default: false,
-  },
+    // Олон хэлтэй нэршил
+    languages: {
+      type: Map,
+      of: new mongoose.Schema({
+        name: { type: String, trim: true, default: "" },
+        short: { type: String, trim: true, default: "" },
+      }),
+      required: true,
+    },
 
-  isModel: {
-    type: Boolean,
-    enum: [true, false],
-    default: false,
-  },
+    slug: { type: String },
+    direct: { type: String, trim: true },
 
-  name: {
-    type: String,
-  },
+    // Эцэг цэс
+    parent: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Menu",
+      default: null,
+    },
 
-  direct: {
-    type: String,
-  },
+    position: { type: Number, default: 1 },
 
-  picture: {
-    type: String,
-  },
+    // Model холбоос (dynamic link)
+    model: { type: String, trim: true },
 
-  slug: {
-    type: String,
-  },
+    createUser: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
 
-  parentId: {
-    type: String,
+    updateUser: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
+  { timestamps: true }
+);
 
-  model: {
-    type: String,
-    enum: ["news", "members", "companys", "faqs", "contacts"],
-  },
+function generateSlugFromLanguages(languages) {
+  for (const [key, value] of languages.entries()) {
+    if (value?.name) {
+      return slugify(value.name);
+    }
+  }
+  return "";
+}
 
-  position: {
-    type: Number,
-  },
+async function ensureUniqueSlug(model, baseSlug, counter = 0) {
+  const slug = counter === 0 ? baseSlug : `${baseSlug}_${counter}`;
+  const existing = await model.findOne({ slug });
+  if (!existing) return slug;
+  return ensureUniqueSlug(model, baseSlug, counter + 1);
+}
 
-  createAt: {
-    type: Date,
-    default: Date.now,
-  },
+FooterMenuSchema.pre("save", async function (next) {
+  const baseSlug = generateSlugFromLanguages(this.languages);
+  if (baseSlug) {
+    this.slug = await ensureUniqueSlug(this.constructor, baseSlug);
+  }
+  next();
+});
 
-  updateAt: {
-    type: Date,
-    default: Date.now,
-  },
-  createUser: {
-    type: mongoose.Schema.ObjectId,
-    ref: "User",
-  },
-  updateUser: {
-    type: mongoose.Schema.ObjectId,
-    ref: "User",
-  },
+FooterMenuSchema.pre("findOneAndUpdate", async function (next) {
+  const update = this.getUpdate();
+  if (update.languages instanceof Map || typeof update.languages === "object") {
+    const baseSlug = generateSlugFromLanguages(update.languages);
+    if (baseSlug) {
+      const slug = await ensureUniqueSlug(this.model, baseSlug);
+      this.set({ slug });
+    }
+  }
+  this.set({ updatedAt: new Date() });
+  next();
 });
 
 module.exports = mongoose.model("FooterMenu", FooterMenuSchema);
