@@ -297,6 +297,7 @@ exports.getTopRateMembers = asyncHandler(async (req, res) => {
   const members = await Members.aggregate([
     { $match: query },
 
+    // Rating мэдээлэл татах
     {
       $lookup: {
         from: "memberrates",
@@ -306,6 +307,7 @@ exports.getTopRateMembers = asyncHandler(async (req, res) => {
       },
     },
 
+    // Онооны тооцоолол
     {
       $addFields: {
         ratingCount: { $size: "$ratings" },
@@ -343,19 +345,23 @@ exports.getTopRateMembers = asyncHandler(async (req, res) => {
       },
     },
 
+    // ✅ Category populate хийх
     {
-      $project: {
-        name: 1,
-        phoneNumber: 1,
-        email: 1,
-        category: 1,
-        partner: 1,
-        ratingCount: 1,
-        rating5Count: 1,
-        rating5Percent: 1,
+      $lookup: {
+        from: "membercategories", // collection name (бага үсгээр, олон тоон дээр)
+        localField: "category",
+        foreignField: "_id",
+        as: "category",
+      },
+    },
+    {
+      $unwind: {
+        path: "$category",
+        preserveNullAndEmptyArrays: true,
       },
     },
 
+    // Санамсаргүй 20 гишүүн авах
     { $sample: { size: 20 } },
   ]);
 
@@ -365,6 +371,8 @@ exports.getTopRateMembers = asyncHandler(async (req, res) => {
     data: members,
   });
 });
+
+
 
 exports.getRateMember = asyncHandler(async (req, res) => {
   const userInputs = req.query;
