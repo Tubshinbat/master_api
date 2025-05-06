@@ -5,37 +5,15 @@ const defaultRules = {
   trim: true,
 };
 
-const ExperienceSchema = new mongoose.Schema({
-  companyName: {
+const ContactLinksSchema = new mongoose.Schema({
+  name: {
     type: String,
     ...defaultRules,
   },
 
-  companyLogo: {
-    type: String,
-  },
-
-  location: {
-    type: Number,
-    defualt: 1,
-  },
-
-  position: {
+  link: {
     type: String,
     ...defaultRules,
-  },
-
-  startDate: {
-    type: String,
-    ...defaultRules,
-  },
-
-  endDate: {
-    type: String,
-  },
-
-  about: {
-    type: String,
   },
 
   createAt: {
@@ -64,4 +42,4 @@ const ExperienceSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("Experience", ExperienceSchema);
+module.exports = mongoose.model("ContactLinks", ContactLinksSchema);

@@ -279,6 +279,93 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
   });
 });
 
+exports.getTopRateMembers = asyncHandler(async (req, res) => {
+  const userInputs = req.query;
+  const query = {
+    memberShip: true,
+  };
+
+  if (valueRequired(userInputs["categories"])) {
+    const array = await MemberCategories.find()
+      .where("_id")
+      .in(userInputs["categories"].split(","))
+      .select("_id");
+
+    query["category"] = { $in: array.map((el) => el._id) };
+  }
+
+  const members = await Members.aggregate([
+    { $match: query },
+
+    {
+      $lookup: {
+        from: "memberrates",
+        localField: "_id",
+        foreignField: "member",
+        as: "ratings",
+      },
+    },
+
+    {
+      $addFields: {
+        ratingCount: { $size: "$ratings" },
+        rating5Count: {
+          $size: {
+            $filter: {
+              input: "$ratings",
+              as: "rate",
+              cond: { $eq: ["$$rate.rate", 5] },
+            },
+          },
+        },
+      },
+    },
+
+    {
+      $addFields: {
+        rating5Percent: {
+          $cond: [
+            { $gt: ["$ratingCount", 0] },
+            {
+              $round: [
+                {
+                  $multiply: [
+                    { $divide: ["$rating5Count", "$ratingCount"] },
+                    100,
+                  ],
+                },
+                1,
+              ],
+            },
+            0,
+          ],
+        },
+      },
+    },
+
+    {
+      $project: {
+        name: 1,
+        phoneNumber: 1,
+        email: 1,
+        category: 1,
+        partner: 1,
+        ratingCount: 1,
+        rating5Count: 1,
+        rating5Percent: 1,
+      },
+    },
+
+    { $sample: { size: 20 } },
+  ]);
+
+  res.status(200).json({
+    success: true,
+    count: members.length,
+    data: members,
+  });
+});
+
 exports.getRateMember = asyncHandler(async (req, res) => {
   const userInputs = req.query;
   const query = {};

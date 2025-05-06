@@ -85,6 +85,50 @@ exports.getMenus = asyncHandler(async (req, res, next) => {
     });
 });
 
+exports.getTopParentCategories = asyncHandler(async (req, res) => {
+  try {
+    const parentCategories = await MemberCategories.aggregate([
+      {
+        $match: {
+          $or: [{ parentId: null }, { parentId: { $exists: false } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "members", // collection name нь `members`
+          localField: "_id",
+          foreignField: "category",
+          as: "members",
+        },
+      },
+      {
+        $addFields: {
+          memberCount: { $size: "$members" },
+        },
+      },
+      {
+        $sort: { memberCount: -1 }, // хамгийн олон гишүүнтэй эхэндээ
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          slug: 1,
+          position: 1,
+          memberCount: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: parentCategories,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 exports.getMenu = asyncHandler(async (req, res, next) => {
   let menu = "";
   if (req.query && req.query.direct) {

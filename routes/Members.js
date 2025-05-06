@@ -18,6 +18,7 @@ const {
   sendPassword,
   resetTokenCheck,
   forgetPasswordChange,
+  getTopRateMembers,
 } = require("../controller/Members");
 const { memberRoles, memberProtect } = require("../middleware/memberRoles");
 
@@ -33,7 +34,7 @@ router
   .get(getMembers);
 
 router.route("/getmembers").get(memberProtect, memberRoles, getMembers);
-
+router.route("/experts").get(getTopRateMembers);
 router
   .route("/memberpasswordchange")
   .put(memberProtect, memberRoles, changeMemberPassword);

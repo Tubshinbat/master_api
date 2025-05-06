@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const MemberRate = require("./Review");
+const MemberRate = require("./MemberRate");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");

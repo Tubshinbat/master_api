@@ -9,12 +9,15 @@ const {
   getMenu,
   updateMenu,
   changePosition,
+  getTopParentCategories,
 } = require("../controller/MemberCategories");
 
 router
   .route("/")
   .post(protect, authorize("admin", "operator"), createMenu)
   .get(getMenus);
+
+router.route("/sorter").get(getTopParentCategories);
 
 router.route("/change").post(protect, authorize("admin"), changePosition);
 
