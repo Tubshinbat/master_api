@@ -7,6 +7,7 @@ const { valueRequired } = require("../lib/check");
 const { userSearch, RegexOptions } = require("../lib/searchOfterModel");
 const MemberCategories = require("../models/MemberCategories");
 const Members = require("../models/Members");
+const CompanyRate = require("../models/CompanyRate");
 
 exports.createPartner = asyncHandler(async (req, res, next) => {
   req.body.createUser = req.userId;
@@ -33,8 +34,15 @@ exports.getPartners = asyncHandler(async (req, res, next) => {
   const status = req.query.status;
   const categories = req.query.categories;
   const category = req.query.category;
+  const q = req.query.q;
 
   const query = Partner.find();
+
+  if (valueRequired(q)) {
+    query.where({
+      $or: [{ name: RegexOptions(q) }, { about: RegexOptions(q) }],
+    });
+  }
 
   if (valueRequired(name))
     query.find({ name: { $regex: ".*" + name + ".*", $options: "i" } });
@@ -90,6 +98,10 @@ exports.getPartners = asyncHandler(async (req, res, next) => {
   query.populate("createUser");
   query.populate("updateUser");
   query.populate("category");
+  query.populate({
+    path: "rating", // Use the path to the virtual property
+    options: { localField: "_id", foreignField: "partner" }, // Provide localField and foreignField options
+  });
 
   const qc = query.toConstructor();
   const clonedQuery = new qc();
@@ -98,12 +110,49 @@ exports.getPartners = asyncHandler(async (req, res, next) => {
   const pagination = await paginate(page, limit, Partner, result);
   query.limit(limit);
   query.skip(pagination.start - 1);
-  const partner = await query.exec();
+  const partners = await query.exec();
+
+  for (const partner of partners) {
+    const countRating = await CompanyRate.find({
+      company: partner._id,
+    }).count();
+
+    if (countRating === 0) {
+      partner.rating = 0; // Default value if there are no ratings
+    } else {
+      partner.ratingCount = countRating;
+      const r5 = await CompanyRate.find({
+        partner: partner._id,
+        rate: 5,
+      }).count();
+      const r4 = await CompanyRate.find({
+        partner: partner._id,
+        rate: 4,
+      }).count();
+      const r3 = await CompanyRate.find({
+        partner: partner._id,
+        rate: 3,
+      }).count();
+      const r2 = await CompanyRate.find({
+        partner: partner._id,
+        rate: 2,
+      }).count();
+      const r1 = await CompanyRate.find({
+        member: partner._id,
+        rate: 1,
+      }).count();
+
+      const averageRating =
+        (5 * r5 + 4 * r4 + 3 * r3 + 2 * r2 + 1 * r1) / (r1 + r2 + r3 + r4 + r5);
+
+      partner.rating = parseInt(averageRating);
+    }
+  }
 
   res.status(200).json({
     success: true,
-    count: partner.length,
-    data: partner,
+    count: partners.length,
+    data: partners,
     pagination,
   });
 });
@@ -200,10 +249,52 @@ exports.getPartner = asyncHandler(async (req, res) => {
   //   }
   // }
 
-  const partner = await Partner.findByIdAndUpdate(req.params.id)
+  const partner = await Partner.findById(req.params.id)
     .populate("createUser")
     .populate("updateUser")
     .populate("category");
+
+  const companyData = await Partner.findById(req.params.id);
+
+  const countRating = await CompanyRate.find({
+    company: companyData._id,
+  }).count();
+
+  if (countRating === 0) {
+    partner.rating = 0; // Default value if there are no ratings
+  } else {
+    const r5 = await CompanyRate.find({
+      company: companyData._id,
+      rate: 5,
+    }).count();
+    const r4 = await CompanyRate.find({
+      company: companyData._id,
+      rate: 4,
+    }).count();
+    const r3 = await CompanyRate.find({
+      company: companyData._id,
+      rate: 3,
+    }).count();
+    const r2 = await CompanyRate.find({
+      company: companyData._id,
+      rate: 2,
+    }).count();
+    const r1 = await CompanyRate.find({
+      company: companyData._id,
+      rate: 1,
+    }).count();
+
+    const averageRating =
+      (5 * r5 + 4 * r4 + 3 * r3 + 2 * r2 + 1 * r1) / (r1 + r2 + r3 + r4 + r5);
+
+    partner.rating = parseInt(averageRating);
+  }
+
+  const ratingCount = await CompanyRate.find({
+    company: companyData._id,
+  }).count();
+
+  partner.ratingCount = ratingCount;
 
   // if (
   //   req.memberTokenIs === true &&

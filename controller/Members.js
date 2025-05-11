@@ -127,6 +127,7 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
   const limit = parseInt(req.query.limit) || 24;
   let sort = req.query.sort || { createAt: -1 };
   const select = req.query.select;
+  const q = req.query.q;
 
   //  FIELDS
   const userInputs = req.query;
@@ -141,9 +142,13 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
   let memberShip = req.query.memberShip;
   const name = req.query.name;
 
-  console.log(partnerId);
-
   const query = Members.find();
+
+  if (valueRequired(q)) {
+    query.where({
+      $or: [{ name: RegexOptions(q) }, { position: RegexOptions(q) }],
+    });
+  }
 
   if (valueRequired(partnerGet)) {
     query.where("partner").in(partnerGet);
@@ -371,8 +376,6 @@ exports.getTopRateMembers = asyncHandler(async (req, res) => {
     data: members,
   });
 });
-
-
 
 exports.getRateMember = asyncHandler(async (req, res) => {
   const userInputs = req.query;
