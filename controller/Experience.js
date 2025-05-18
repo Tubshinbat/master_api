@@ -4,7 +4,11 @@ const asyncHandler = require("express-async-handler");
 const paginate = require("../utils/paginate");
 const { imageDelete } = require("../lib/photoUpload");
 const { valueRequired } = require("../lib/check");
-const { userSearch, RegexOptions } = require("../lib/searchOfterModel");
+const {
+  userSearch,
+  RegexOptions,
+  memberSearch,
+} = require("../lib/searchOfterModel");
 
 exports.createExperience = asyncHandler(async (req, res) => {
   req.userFront === true
@@ -52,6 +56,8 @@ exports.getExperiences = asyncHandler(async (req, res) => {
   const updateUser = req.query.updateUser;
   const pkey = req.query.pkey;
 
+  console.log(req.query);
+
   const query = Experience.find();
 
   if (req.userFront) {
@@ -69,8 +75,7 @@ exports.getExperiences = asyncHandler(async (req, res) => {
   });
 
   if (valueRequired(pkey)) {
-    const userData = await memberSearch(pkey);
-    if (userData) query.where("pkey").in(userData);
+    query.where("pkey").in(pkey);
   }
 
   if (valueRequired(createUser)) {

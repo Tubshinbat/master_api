@@ -70,7 +70,7 @@ exports.checkToken = asyncHandler(async (req, res) => {
 
   const tokenObject = jwt.verify(token.nodetoken, process.env.JWT_SECRET);
 
-  const user = await Members.findById(tokenObject.id);
+  const user = await Members.findById(tokenObject.id).select("-password");
 
   res.status(200).json({
     success: true,
@@ -545,6 +545,8 @@ exports.getMember = asyncHandler(async (req, res, next) => {
   if (!member) {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
+  let ratingStats = {};
+
   const countRating = await MemberRate.find({ member: member._id }).count();
   if (countRating === 0) {
     member.rating = 0; // Default value if there are no ratings
@@ -555,10 +557,15 @@ exports.getMember = asyncHandler(async (req, res, next) => {
     const r2 = await MemberRate.find({ member: member._id, rate: 2 }).count();
     const r1 = await MemberRate.find({ member: member._id, rate: 1 }).count();
 
-    const averageRating =
-      (5 * r5 + 4 * r4 + 3 * r3 + 2 * r2 + 1 * r1) / (r1 + r2 + r3 + r4 + r5);
+    const ratingCount = r1 + r2 + r3 + r4 + r5;
+    const averageRating = ratingCount
+      ? ((5 * r5 + 4 * r4 + 3 * r3 + 2 * r2 + 1 * r1) / ratingCount).toFixed(2)
+      : 0;
 
-    member.rating = parseInt(averageRating);
+    member.rating = averageRating;
+    member.ratingCount = ratingCount;
+
+    ratingStats = { 5: r5, 4: r4, 3: r3, 2: r2, 1: r1 };
   }
 
   const ratingCount = await MemberRate.find({ member: member._id }).count();
@@ -566,15 +573,16 @@ exports.getMember = asyncHandler(async (req, res, next) => {
   member.ratingCount = ratingCount;
 
   if (valueRequired(member.partner)) {
-    alternativeMembers = await Members.find({
-      partner: member.partner._id,
-    });
+    alternativeMembers = await Members.find({})
+      .where("partner")
+      .in(member.partner);
   }
 
   res.status(200).json({
     success: true,
     data: member,
     alternativeMembers,
+    ratingStats,
   });
 });
 
@@ -622,7 +630,14 @@ exports.updateMember = asyncHandler(async (req, res, next) => {
     }
   }
 
-  console.log(req.body);
+  if (typeof req.body.location === "string") {
+    try {
+      req.body.location = JSON.parse(req.body.location);
+    } catch (err) {
+      console.log("location parse error", err);
+      delete req.body.location;
+    }
+  }
 
   member = await Members.findByIdAndUpdate(req.params.id, req.body, {
     new: true,

@@ -24,14 +24,23 @@ const MembersSchema = new mongoose.Schema(
       default: false,
     },
 
-    lat: {
-      type: String,
-      default: "47.91913589111381",
-    },
-
-    long: {
-      type: String,
-      default: "106.91757790656888",
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        required: true,
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number],
+        required: true,
+        validate: {
+          validator: function (val) {
+            return val.length === 2;
+          },
+          message: "Координатын формат буруу байна",
+        },
+      },
     },
 
     lastName: {
@@ -62,10 +71,12 @@ const MembersSchema = new mongoose.Schema(
       type: String,
     },
 
-    partner: {
-      type: mongoose.Schema.ObjectId,
-      ref: "Partner",
-    },
+    partner: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "Partner",
+      },
+    ],
 
     role: {
       type: String,
