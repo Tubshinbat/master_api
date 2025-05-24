@@ -27,6 +27,10 @@ exports.createMember = asyncHandler(async (req, res, next) => {
     req.body.partner = null;
   }
 
+  if (!req.body.localtion) {
+    delete req.body.location;
+  }
+
   const uniqueEmail = await Members.find({
     email: req.body.email,
   });
@@ -145,6 +149,7 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
   const query = Members.find();
 
   if (valueRequired(q)) {
+    query.where({ memberShip: true });
     query.where({
       $or: [{ name: RegexOptions(q) }, { position: RegexOptions(q) }],
     });
@@ -160,7 +165,7 @@ exports.getMembers = asyncHandler(async (req, res, next) => {
     } else query.where("status").equals(status);
   }
 
-  if (valueRequired(memberShip)) {
+  if (valueRequired(memberShip) && !valueRequired(q)) {
     if (memberShip.split(",").length > 1) {
       query.where("memberShip").in(memberShip.split(","));
     } else {

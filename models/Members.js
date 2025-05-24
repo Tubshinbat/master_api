@@ -28,18 +28,13 @@ const MembersSchema = new mongoose.Schema(
       type: {
         type: String,
         enum: ["Point"],
-        required: true,
+        required: false,
         default: "Point",
       },
       coordinates: {
         type: [Number],
-        required: true,
-        validate: {
-          validator: function (val) {
-            return val.length === 2;
-          },
-          message: "Координатын формат буруу байна",
-        },
+        required: false,
+        default: [0, 0],
       },
     },
 
