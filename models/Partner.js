@@ -17,13 +17,35 @@ const PartnerSchema = new mongoose.Schema(
       required: [true, "Хамтрагч компанийн нэрийг оруулна уу"],
     },
 
+    email: {
+      type: String,
+      unique: true,
+      trim: true,
+      match: [
+        /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
+        "Имэйл хаягаа буруу оруулсан байна",
+      ],
+    },
+
+    phoneNumber: {
+      type: Number,
+      unique: true,
+      trim: true,
+      required: [true, "Утасны дугаараа оруулна уу"],
+    },
+
     about: {
       type: String,
       trim: true,
       required: [true, "Дэлгэрэнгүй мэдээллийг оруулна уу"],
     },
 
-    links: { type: String },
+    links: [
+      {
+        name: { type: String },
+        url: { type: String },
+      },
+    ],
 
     category: [
       {
@@ -35,6 +57,20 @@ const PartnerSchema = new mongoose.Schema(
     cover: {
       type: String,
     },
+
+    admins: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "Members",
+      },
+    ],
+
+    employees: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "Members",
+      },
+    ],
 
     teachers: [
       {
@@ -54,14 +90,18 @@ const PartnerSchema = new mongoose.Schema(
       type: String,
     },
 
-    lat: {
-      type: String,
-      default: "47.91913589111381",
-    },
-
-    long: {
-      type: String,
-      default: "106.91757790656888",
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        required: false,
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number],
+        required: false,
+        default: [0, 0],
+      },
     },
 
     rating: {

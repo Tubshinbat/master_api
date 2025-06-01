@@ -9,8 +9,15 @@ const {
   multDeletePartner,
   updatePartner,
   getPartner,
+  getUserPartners,
+  createUserPartner,
+  updateUserPartner,
 } = require("../controller/Partner");
-const { memberRoles, memberProtect } = require("../middleware/memberRoles");
+const {
+  memberRoles,
+  memberProtect,
+  memberHardProtect,
+} = require("../middleware/memberRoles");
 
 router
   .route("/")
@@ -28,6 +35,10 @@ router
   .get(protect, authorize("admin", "operator"), getCountPartner);
 
 router.route("/delete").delete(protect, authorize("admin"), multDeletePartner);
+
+router.route("/users").get(memberHardProtect, getUserPartners);
+router.route("/create-user").post(memberHardProtect, createUserPartner);
+router.route("/update-user/:id").put(memberHardProtect, updateUserPartner);
 
 router
   .route("/:id")
