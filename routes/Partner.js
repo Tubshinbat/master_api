@@ -21,13 +21,7 @@ const {
 
 router
   .route("/")
-  .post(
-    protect,
-    authorize("admin", "operator", "partner"),
-    memberProtect,
-    memberRoles,
-    createPartner
-  )
+  .post(protect, authorize("admin", "operator", "partner"), createPartner)
   .get(getPartners);
 
 router
@@ -42,13 +36,7 @@ router.route("/update-user/:id").put(memberHardProtect, updateUserPartner);
 
 router
   .route("/:id")
-  .get(memberProtect, memberRoles, getPartner)
-  .put(
-    protect,
-    authorize("admin", "operator", "partner"),
-    memberProtect,
-    memberRoles,
-    updatePartner
-  );
+  .get(getPartner)
+  .put(protect, authorize("admin", "operator", "partner"), updatePartner);
 
 module.exports = router;
